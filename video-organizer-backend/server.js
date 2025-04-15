@@ -6,6 +6,8 @@ const connectDB = require('./config/db');
 // Import routes
 const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profile');
+const videoRoutes = require('./routes/video');
+const categoryRoutes = require('./routes/category');
 
 const app = express();
 
@@ -19,6 +21,8 @@ connectDB();
 // Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/videos', videoRoutes);
+app.use('/api/categories', categoryRoutes);
 
 // Test Route
 app.get("/", (req, res) => {
