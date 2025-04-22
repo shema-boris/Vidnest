@@ -1,23 +1,41 @@
 import React, { useState } from 'react';
 import './Register.css';
+import { registerUser } from '../utils/authService';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
   const [form, setForm] = useState({ username: '', email: '', password: '', confirmPassword: '' });
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Connect to backend
-    alert('Register submitted: ' + JSON.stringify(form));
+    setError('');
+    setSuccess('');
+    if (form.password !== form.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    try {
+      await registerUser({ username: form.username, email: form.email, password: form.password });
+      setSuccess('Registration successful! You can now log in.');
+      setTimeout(() => navigate('/login'), 1000);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Registration failed.');
+    }
   };
 
   return (
     <div className="register-container">
       <h2 className="register-title">Register</h2>
       <form className="register-form" onSubmit={handleSubmit}>
+        {error && <div className="register-error" style={{ color: 'red', marginBottom: 12 }}>{error}</div>}
+        {success && <div className="register-success" style={{ color: 'green', marginBottom: 12 }}>{success}</div>}
         <div className="register-form-group">
           <label htmlFor="username">Username:</label>
           <input
