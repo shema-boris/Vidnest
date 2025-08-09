@@ -264,4 +264,20 @@ router.get('/tags/top', async (req, res) => {
     }
 });
 
+// Import video from URL
+// @desc    Import video from URL
+// @route   POST /api/videos/import
+// @access  Private
+router.post('/import', async (req, res) => {
+    try {
+        const videoImportController = require('../controllers/videoImportController');
+        await videoImportController.importVideo(req, res);
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: 'Failed to process video import'
+        });
+    }
+});
+
 module.exports = router;
