@@ -1,17 +1,24 @@
 const Video = require('../models/Video');
 const { v4: uuidv4 } = require('uuid');
-const axios = require('axios');
 const fs = require('fs').promises;
 const path = require('path');
+const { TikTokDownloader } = require('../utils/platforms/tiktokDownloader');
+const { InstagramDownloader } = require('../utils/platforms/instagramDownloader');
+const { YouTubeDownloader } = require('../utils/platforms/youtubeDownloader');
 
-// Helper function to validate URL
-const isValidUrl = (url) => {
-    try {
-        new URL(url);
-        return true;
-    } catch (err) {
-        return false;
+// Platform downloader instances
+const PLATFORMS = {
+    TikTok: TikTokDownloader,
+    Instagram: InstagramDownloader,
+    YouTube: YouTubeDownloader
+};
+
+// Helper function to get platform downloader
+const getPlatformDownloader = (platform) => {
+    if (!PLATFORMS[platform]) {
+        throw new Error(`Unsupported platform: ${platform}`);
     }
+    return PLATFORMS[platform];
 };
 
 // Helper function to extract platform from URL
@@ -27,6 +34,7 @@ const getPlatformFromUrl = (url) => {
 const importVideo = async (req, res) => {
     try {
         const { url, title, description, category } = req.body;
+        const userId = req.user.id; // Get user ID from JWT
 
         // Validate required fields
         if (!url) {
@@ -36,49 +44,76 @@ const importVideo = async (req, res) => {
             });
         }
 
-        // Validate URL format
-        if (!isValidUrl(url)) {
+        if (!category) {
             return res.status(400).json({
                 success: false,
-                error: 'Invalid URL format'
+                error: 'Category is required'
             });
         }
 
-        // Extract platform from URL
+        // Get platform from URL
         const platform = getPlatformFromUrl(url);
+        const downloader = getPlatformDownloader(platform);
 
-        // Create unique filename for video
-        const videoFilename = `${uuidv4()}.mp4`;
-        const uploadPath = path.join(__dirname, '../uploads/videos', videoFilename);
+        // Validate URL for specific platform
+        if (!downloader.isValidUrl(url)) {
+            return res.status(400).json({
+                success: false,
+                error: downloader.getErrorMessage('INVALID_URL')
+            });
+        }
 
-        // Download video (this is a placeholder - actual implementation will depend on platform)
-        // For now, we'll just create a dummy video file
-        await fs.writeFile(uploadPath, 'DUMMY VIDEO CONTENT');
+        // Create temporary directory for downloads
+        const tempDir = path.join(__dirname, '../temp');
+        await fs.mkdir(tempDir, { recursive: true });
 
-        // Create video object
-        const video = new Video({
-            userId: req.user._id,
+        // Download video using platform-specific downloader
+        const downloadResult = await downloader.downloadVideo(url, tempDir);
+
+        // Create video document
+        const videoData = {
+            userId,
             platform,
-            videoUrl: uploadPath,
-            title: title || `Imported from ${platform}`,
-            description: description || '',
-            category: category || null,
-            tags: [] // Tags can be added later
-        });
+            videoUrl: url,
+            title: title || downloadResult.metadata.title,
+            description: description || downloadResult.metadata.description,
+            category,
+            localFilePath: downloadResult.path,
+            ...downloadResult.metadata // Include all other metadata
+        };
 
         // Save video to database
-        const savedVideo = await video.save();
+        const video = new Video(videoData);
+        await video.save();
 
-        res.status(201).json({
+        // Clean up temporary files after successful save
+        await fs.unlink(downloadResult.path);
+
+        return res.status(201).json({
             success: true,
-            data: savedVideo
+            data: {
+                id: video._id,
+                title: video.title,
+                platform: video.platform,
+                savedAt: video.savedAt,
+                metadata: {
+                    author: video.author,
+                    views: video.views,
+                    likes: video.likes,
+                    dislikes: video.dislikes,
+                    comments: video.comments,
+                    uploadDate: video.uploadDate,
+                    duration: video.duration,
+                    thumbnailUrl: video.thumbnailUrl
+                }
+            }
         });
 
     } catch (error) {
         console.error('Error importing video:', error);
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
-            error: 'Failed to import video. Please try again later.'
+            error: error.message
         });
     }
 };
