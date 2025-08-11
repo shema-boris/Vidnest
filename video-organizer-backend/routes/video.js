@@ -2,9 +2,79 @@ const express = require('express');
 const router = express.Router();
 const Video = require('../models/Video');
 const verifyToken = require('../middleware/verifyToken');
+const videoImportController = require('../controllers/videoImportController');
+const rateLimit = require('express-rate-limit');
 
 // Protect all routes
 router.use(verifyToken);
+
+// Limit requests to 5 per minute per IP
+const limiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 5, // limit each IP to 5 requests per windowMs
+    message: {
+        success: false,
+        error: 'Too many requests from this IP, please try again later.'
+    }
+});
+
+// @desc    Import video from platform
+// @route   POST /api/videos/import
+// @access  Private
+router.post('/import', limiter, async (req, res) => {
+    try {
+        const { url, title, description, category, platform } = req.body;
+        
+        // Validate required fields
+        if (!url) {
+            return res.status(400).json({
+                success: false,
+                error: 'Video URL is required'
+            });
+        }
+
+        if (!category) {
+            return res.status(400).json({
+                success: false,
+                error: 'Category is required'
+            });
+        }
+
+        if (!platform) {
+            return res.status(400).json({
+                success: false,
+                error: 'Platform is required'
+            });
+        }
+
+        // Validate platform
+        const validPlatforms = ['YouTube', 'TikTok', 'Instagram'];
+        if (!validPlatforms.includes(platform)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid platform. Supported platforms: YouTube, TikTok, Instagram'
+            });
+        }
+
+        // Call the import controller
+        const result = await videoImportController.importVideo({
+            url,
+            title,
+            description,
+            category,
+            platform,
+            userId: req.user._id
+        });
+
+        res.json(result);
+    } catch (error) {
+        console.error('Video import error:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message || 'Failed to import video'
+        });
+    }
+});
 
 // @desc    Create new video
 // @route   POST /api/videos
@@ -260,22 +330,6 @@ router.get('/tags/top', async (req, res) => {
         res.status(500).json({
             success: false,
             error: error.message
-        });
-    }
-});
-
-// Import video from URL
-// @desc    Import video from URL
-// @route   POST /api/videos/import
-// @access  Private
-router.post('/import', async (req, res) => {
-    try {
-        const videoImportController = require('../controllers/videoImportController');
-        await videoImportController.importVideo(req, res);
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: 'Failed to process video import'
         });
     }
 });

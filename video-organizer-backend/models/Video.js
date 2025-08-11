@@ -106,7 +106,6 @@ const videoSchema = new mongoose.Schema({
 videoSchema.index({ userId: 1, platform: 1 });
 videoSchema.index({ tags: 1 });
 videoSchema.index({ category: 1 });
-videoSchema.index({ videoId: 1 });
 
 const Video = mongoose.model('Video', videoSchema);
 

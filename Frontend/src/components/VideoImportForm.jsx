@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -11,6 +11,11 @@ const VideoImportForm = ({ onSuccess, onError }) => {
         category: ''
     });
     const [loading, setLoading] = useState(false);
+    const [progress, setProgress] = useState({
+        status: '',
+        progress: 0,
+        message: ''
+    });
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -24,6 +29,7 @@ const VideoImportForm = ({ onSuccess, onError }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+        setProgress({ status: 'pending', progress: 0, message: 'Starting video import...' });
 
         try {
             // Validate URL
@@ -32,10 +38,16 @@ const VideoImportForm = ({ onSuccess, onError }) => {
                 throw new Error('Please enter a video URL');
             }
 
+            // Validate URL format - now supports YouTube URLs with parameters
+            const urlRegex = /^(https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[\w-]+(?:\S+)?$/;
+            if (!urlRegex.test(url)) {
+                throw new Error('Please enter a valid YouTube, TikTok, or Instagram URL');
+            }
+
             // Extract platform from URL
             const platform = getPlatformFromUrl(url);
             if (!platform) {
-                throw new Error('Unsupported video platform');
+                throw new Error('Unsupported video platform. Please provide a valid URL from YouTube, TikTok, or Instagram.');
             }
 
             // Validate category
@@ -44,21 +56,52 @@ const VideoImportForm = ({ onSuccess, onError }) => {
             }
 
             // Make API call to import video
-            const response = await axios.post('/api/videos/import', {
-                ...formData,
-                platform
-            });
+            try {
+                const token = localStorage.getItem('jwt');
+                if (!token) {
+                    throw new Error('Not authenticated. Please log in first.');
+                }
 
-            if (response.data.success) {
-                onSuccess();
-                toast.success('Video imported successfully!');
-            } else {
-                throw new Error(response.data.error || 'Failed to import video');
+                const apiUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/videos/import`;
+                const response = await axios.post(apiUrl, {
+                    ...formData,
+                    platform
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.data.success) {
+                    onSuccess();
+                    toast.success('Video imported successfully!');
+                    setProgress({ 
+                        status: 'completed', 
+                        progress: 100, 
+                        message: 'Video imported successfully!' 
+                    });
+                } else {
+                    throw new Error(response.data.error || 'Failed to import video');
+                }
+            } catch (error) {
+                const errorMessage = error.response?.data?.error || error.message;
+                onError(errorMessage);
+                toast.error(errorMessage);
+                setProgress({ 
+                    status: 'failed', 
+                    progress: 0, 
+                    message: errorMessage 
+                });
             }
         } catch (error) {
-            const errorMessage = error.response?.data?.error || error.message;
+            const errorMessage = error.message;
             onError(errorMessage);
             toast.error(errorMessage);
+            setProgress({ 
+                status: 'failed', 
+                progress: 0, 
+                message: errorMessage 
+            });
         } finally {
             setLoading(false);
         }
@@ -66,11 +109,25 @@ const VideoImportForm = ({ onSuccess, onError }) => {
 
     // Helper function to extract platform from URL
     const getPlatformFromUrl = (url) => {
-        const hostname = new URL(url).hostname;
-        if (hostname.includes('tiktok')) return 'TikTok';
-        if (hostname.includes('instagram')) return 'Instagram';
-        if (hostname.includes('youtube')) return 'YouTube';
-        return null;
+        try {
+            const hostname = new URL(url).hostname;
+            const normalizedHostname = hostname.toLowerCase()
+                .replace('www.', '')
+                .replace('m.', '');
+
+            if (normalizedHostname.includes('youtube.com') || normalizedHostname.includes('youtu.be')) {
+                return 'YouTube';
+            }
+            if (normalizedHostname.includes('tiktok.com')) {
+                return 'TikTok';
+            }
+            if (normalizedHostname.includes('instagram.com')) {
+                return 'Instagram';
+            }
+            return null;
+        } catch (error) {
+            return null;
+        }
     };
 
     return (
@@ -126,7 +183,6 @@ const VideoImportForm = ({ onSuccess, onError }) => {
                     required
                 >
                     <option value="">Select a category...</option>
-                    {/* These options will be populated from the API */}
                     <option value="entertainment">Entertainment</option>
                     <option value="education">Education</option>
                     <option value="sports">Sports</option>
@@ -134,6 +190,26 @@ const VideoImportForm = ({ onSuccess, onError }) => {
                     <option value="other">Other</option>
                 </select>
             </div>
+
+            {progress.status && (
+                <div className="progress-section mb-3">
+                    <div className="progress">
+                        <div
+                            className="progress-bar"
+                            role="progressbar"
+                            style={{ width: `${progress.progress}%` }}
+                            aria-valuenow={progress.progress}
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                        >
+                            {progress.progress}%
+                        </div>
+                    </div>
+                    <p className={`progress-message ${progress.status}`}>
+                        {progress.message}
+                    </p>
+                </div>
+            )}
 
             <button
                 type="submit"

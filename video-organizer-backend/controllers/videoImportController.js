@@ -1,4 +1,5 @@
 const Video = require('../models/Video');
+const Progress = require('../middleware/progressTracking');
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs').promises;
 const path = require('path');
@@ -31,10 +32,23 @@ const getPlatformFromUrl = (url) => {
 };
 
 // Main import function
-const importVideo = async (req, res) => {
+const importVideo = async (data, res) => {
     try {
-        const { url, title, description, category } = req.body;
-        const userId = req.user.id; // Get user ID from JWT
+        // If data is a request object, extract the data
+        const { req } = data || {};
+        const { url, title, description, category, userId } = req ? {
+            url: req.body.url,
+            title: req.body.title,
+            description: req.body.description,
+            category: req.body.category,
+            userId: req.user.id
+        } : {
+            url: data.url,
+            title: data.title,
+            description: data.description,
+            category: data.category,
+            userId: data.userId
+        };
 
         // Validate required fields
         if (!url) {
@@ -50,6 +64,31 @@ const importVideo = async (req, res) => {
                 error: 'Category is required'
             });
         }
+
+        // Create progress tracker
+        const progress = new Progress({
+            userId,
+            videoId: null, // Will be set after video creation
+            status: 'pending',
+            message: 'Starting video import...'
+        });
+        await progress.save();
+
+        // Create video record first
+        const video = new Video({
+            userId,
+            platform: getPlatformFromUrl(url),
+            videoUrl: url,
+            title: title || '',
+            description: description || '',
+            category
+        });
+        await video.save();
+
+        // Update progress with video ID
+        await progress.updateProgress('in_progress', null, 'Downloading video...');
+        progress.videoId = video._id;
+        await progress.save();
 
         // Get platform from URL
         const platform = getPlatformFromUrl(url);
@@ -68,23 +107,26 @@ const importVideo = async (req, res) => {
         await fs.mkdir(tempDir, { recursive: true });
 
         // Download video using platform-specific downloader
-        const downloadResult = await downloader.downloadVideo(url, tempDir);
+        const downloadResult = await downloader.downloadVideo(url, tempDir, (progressPercent) => {
+            progress.updateProgress('in_progress', progressPercent, 'Downloading...');
+        });
 
-        // Create video document
-        const videoData = {
-            userId,
-            platform,
-            videoUrl: url,
-            title: title || downloadResult.metadata.title,
-            description: description || downloadResult.metadata.description,
-            category,
-            localFilePath: downloadResult.path,
-            ...downloadResult.metadata // Include all other metadata
-        };
+        // Update video record with metadata
+        await Video.findByIdAndUpdate(video._id, {
+            title: downloadResult.metadata.title || title,
+            description: downloadResult.metadata.description || description,
+            author: downloadResult.metadata.author,
+            views: downloadResult.metadata.views,
+            likes: downloadResult.metadata.likes,
+            comments: downloadResult.metadata.comments,
+            uploadDate: downloadResult.metadata.uploadDate,
+            duration: downloadResult.metadata.duration,
+            thumbnailUrl: downloadResult.metadata.thumbnailUrl,
+            localFilePath: downloadResult.path
+        });
 
-        // Save video to database
-        const video = new Video(videoData);
-        await video.save();
+        // Update progress to completed
+        await progress.updateProgress('completed', 100, 'Video imported successfully');
 
         // Clean up temporary files after successful save
         await fs.unlink(downloadResult.path);
@@ -110,6 +152,8 @@ const importVideo = async (req, res) => {
         });
 
     } catch (error) {
+        // Update progress to failed
+        await Progress.findByIdAndDelete(progress._id).catch(() => {});
         console.error('Error importing video:', error);
         return res.status(500).json({
             success: false,
