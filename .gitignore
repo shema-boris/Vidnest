@@ -1,0 +1,9 @@
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Node modules (handled by frontend and backend)
+node_modules/
