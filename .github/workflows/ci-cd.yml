@@ -21,8 +21,8 @@ jobs:
         working-directory: ./backend
         run: npm ci
       
-      - name: Install frontend deps
-        working-directory: ./frontend
+      - name: Install Frontend deps
+        working-directory: ./Frontend
         run: npm ci
       
       # Run tests
@@ -34,7 +34,7 @@ jobs:
           MONGODB_URI: mongodb://localhost:27017/vidnest_test
       
       - name: Run frontend tests
-        working-directory: ./frontend
+        working-directory: ./Frontend
         run: npm test -- --watchAll=false
 
   deploy-staging:
@@ -48,7 +48,7 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: frontend
+          working-directory: Frontend
           vercel-args: '--prod'
 
   deploy-prod:
@@ -62,5 +62,5 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: frontend
+          working-directory: Frontend
           vercel-args: '--prod --confirm'
