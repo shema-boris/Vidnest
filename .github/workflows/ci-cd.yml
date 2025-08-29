@@ -19,11 +19,11 @@ jobs:
       # Install dependencies
       - name: Install backend deps
         working-directory: ./backend
-        run: npm ci
+        run: npm install
       
       - name: Install Frontend deps
         working-directory: ./Frontend
-        run: npm ci
+        run: npm install
       
       # Run tests
       - name: Run backend tests
