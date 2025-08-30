@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [master, develop]
+    branches: [master, develop, main]
   pull_request:
     branches: [main, develop]
 
@@ -11,35 +11,49 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NODE_ENV: test
-      MONGODB_URI: ${{ secrets.MONGODB_URI }}  # Store your production MongoDB URI in GitHub Secrets
       
     steps:
       - uses: actions/checkout@v3
+      
       - uses: actions/setup-node@v3
         with:
           node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            Frontend/package-lock.json
+
+      # Create .env file for backend tests
+      - name: Create test environment file
+        working-directory: ./backend
+        run: |
+          echo "MONGODB_URI=${{ secrets.MONGODB_URI }}" > .env
+          echo "JWT_SECRET=github-actions-test-secret-$(date +%s)" >> .env
+          echo "JWT_EXPIRE=30d" >> .env
+          echo "NODE_ENV=test" >> .env
+          echo "PORT=5000" >> .env
+          echo "FRONTEND_URL=http://localhost:3000" >> .env
+          echo "DEBUG=false" >> .env
 
       # Install backend dependencies
       - name: Install backend deps
         working-directory: ./backend
-        run: npm install
+        run: npm ci --silent
 
       # Install frontend dependencies
       - name: Install frontend deps
         working-directory: ./Frontend
-        run: npm install
+        run: npm ci --silent
 
       # Run backend tests
       - name: Run backend tests
         working-directory: ./backend
-        run: npm test
-        env:
-          MONGODB_URI: ${{secrets.MONGODB_URI}}
+        run: npm test --silent --detectOpenHandles --forceExit
 
-      # Run frontend tests (Vitest without --watchAll)
+      # Run frontend tests
       - name: Run frontend tests
         working-directory: ./Frontend
-        run: npm test  # Make sure your "test" script in package.json just runs "vitest run"
+        run: npm test --silent
 
   deploy-staging:
     needs: test
