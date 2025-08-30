@@ -9,33 +9,37 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      MONGODB_URI: ${{ secrets.MONGODB_URI }}  # Store your production MongoDB URI in GitHub Secrets
+      
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: '18'
-          cache: 'npm'
-      
-      # Install dependencies
+
+      # Install backend dependencies
       - name: Install backend deps
         working-directory: ./backend
         run: npm install
-      
-      - name: Install Frontend deps
+
+      # Install frontend dependencies
+      - name: Install frontend deps
         working-directory: ./Frontend
         run: npm install
-      
-      # Run tests
+
+      # Run backend tests
       - name: Run backend tests
         working-directory: ./backend
         run: npm test
         env:
-          NODE_ENV: test
-          MONGODB_URI: mongodb://localhost:27017/vidnest_test
-      
+          MONGODB_URI: ${{secrets.MONGODB_URI}}
+
+      # Run frontend tests (Vitest without --watchAll)
       - name: Run frontend tests
         working-directory: ./Frontend
-        run: npm test -- --watchAll=false
+        run: npm test  # Make sure your "test" script in package.json just runs "vitest run"
 
   deploy-staging:
     needs: test

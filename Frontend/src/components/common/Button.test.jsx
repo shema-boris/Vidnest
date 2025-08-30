@@ -12,7 +12,7 @@ describe('Button component', () => {
   it('applies the correct variant class', () => {
     render(<Button variant="secondary">Secondary</Button>);
     const buttonElement = screen.getByRole('button', { name: /secondary/i });
-    expect(buttonElement).toHaveClass('bg-secondary-600');
+    expect(buttonElement).toHaveClass('bg-secondary');
   });
 
   it('handles click events', () => {

@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'; 
 import request from 'supertest';
 import app from '../server.js';
 import Video from '../models/Video.js';
@@ -26,11 +26,13 @@ const videoData = {
 };
 
 beforeAll(async () => {
-  // Connect to a test database
-  await mongoose.connect(process.env.MONGODB_URI + '_test', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  // Connect to a test database only if not already connected
+  if (mongoose.connection.readyState === 0) {
+    await mongoose.connect(process.env.MONGODB_URI + '_test', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+  }
 
   // Create a test user
   const user = await User.create(userData);

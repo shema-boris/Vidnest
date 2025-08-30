@@ -147,9 +147,10 @@ export const deleteVideo = async (req, res) => {
       return res.status(404).json({ message: 'Video not found' });
     }
 
-    await video.remove();
+    await Video.deleteOne({ _id: video._id });
     res.json({ message: 'Video removed' });
   } catch (error) {
+    console.error("Delete Video Error:", error.message);
     res.status(500).json({ message: error.message });
   }
 };
