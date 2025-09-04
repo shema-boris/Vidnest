@@ -1,9 +1,15 @@
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
+// Get the base URL and ensure it ends with /api
+const getBaseUrl = () => {
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  return baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
+};
+
 // Create axios instance with base URL
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: getBaseUrl(),
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
