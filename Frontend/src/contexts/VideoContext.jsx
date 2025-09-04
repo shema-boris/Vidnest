@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
@@ -20,87 +20,69 @@ export const VideoProvider = ({ children }) => {
     limit: 12,
   });
 
-  // Fetch videos with current search parameters
+  // Fetch user's videos
   const {
     data: videosData = { videos: [], total: 0, totalPages: 1 },
     isLoading: isLoadingVideos,
     isError: isVideosError,
     error: videosError,
-    refetch: refetchVideos,
   } = useQuery({
     queryKey: ['userVideos', searchParams],
     queryFn: () => videoService.getUserVideos(searchParams),
-    enabled: isAuthenticated, // Only fetch if user is authenticated
+    enabled: isAuthenticated,
     keepPreviousData: true,
   });
 
-  // Refetch videos when authentication state changes
-  useEffect(() => {
-    if (isAuthenticated) {
-      refetchVideos();
-    }
-  }, [isAuthenticated, refetchVideos]);
-
-  // Fetch available tags
-  const { data: availableTags = [] } = useQuery({
-    queryKey: ['videoTags'],
-    queryFn: videoService.getVideoTags,
-    enabled: isAuthenticated,
-    staleTime: 60 * 60 * 1000, // 1 hour
-  });
-
   // Fetch single video
-  const getVideo = useCallback((videoId) => {
-    return queryClient.fetchQuery({
-      queryKey: ['video', videoId],
-      queryFn: () => videoService.getVideoById(videoId),
-    });
+  const getVideo = useCallback(async (id) => {
+    try {
+      const video = await videoService.getVideoById(id);
+      return video;
+    } catch (error) {
+      console.error('Error fetching video:', error);
+      throw error;
+    }
+  }, []);
+
+  // Create video
+  const createVideo = useCallback(async (videoData) => {
+    try {
+      const newVideo = await videoService.createVideo(videoData);
+      queryClient.invalidateQueries(['userVideos']);
+      toast.success('Video saved successfully');
+      return newVideo;
+    } catch (error) {
+      console.error('Error creating video:', error);
+      throw error;
+    }
   }, [queryClient]);
 
-  // Create video mutation
-  const createVideoMutation = useMutation({
-    mutationFn: videoService.createVideo,
-    onSuccess: (data) => {
+  // Update video
+  const updateVideo = useCallback(async (id, videoData) => {
+    try {
+      const updatedVideo = await videoService.updateVideo(id, videoData);
       queryClient.invalidateQueries(['userVideos']);
-      toast.success('Video added successfully');
-      navigate(`/videos/${data._id}`);
-    },
-    onError: (error) => {
-      const errorMessage = error.response?.data?.message || 'Failed to add video';
-      if (error.response?.status === 400 && errorMessage.includes('already been added')) {
-        toast.error('This video has already been added to your collection');
-      } else {
-        toast.error(errorMessage);
-      }
-    },
-  });
-
-  // Update video mutation
-  const updateVideoMutation = useMutation({
-    mutationFn: ({ id, ...data }) => videoService.updateVideo(id, data),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries(['userVideos']);
-      queryClient.invalidateQueries(['video', data._id]);
+      queryClient.invalidateQueries(['video', id]);
       toast.success('Video updated successfully');
-      navigate(`/videos/${data._id}`);
-    },
-    onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to update video');
-    },
-  });
+      return updatedVideo;
+    } catch (error) {
+      console.error('Error updating video:', error);
+      throw error;
+    }
+  }, [queryClient]);
 
-  // Delete video mutation
-  const deleteVideoMutation = useMutation({
-    mutationFn: videoService.deleteVideo,
-    onSuccess: () => {
+  // Delete video
+  const deleteVideo = useCallback(async (id) => {
+    try {
+      await videoService.deleteVideo(id);
       queryClient.invalidateQueries(['userVideos']);
       toast.success('Video deleted successfully');
-      navigate('/videos');
-    },
-    onError: (error) => {
-      toast.error(error.response?.data?.message || 'Failed to delete video');
-    },
-  });
+      return true;
+    } catch (error) {
+      console.error('Error deleting video:', error);
+      throw error;
+    }
+  }, [queryClient]);
 
   // Handle search
   const handleSearch = useCallback((params) => {
@@ -120,23 +102,13 @@ export const VideoProvider = ({ children }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  // Handle video view increment
-  const handleViewIncrement = useCallback(async (videoId) => {
-    try {
-      await videoService.incrementVideoViews(videoId);
-      queryClient.invalidateQueries(['video', videoId]);
-    } catch (error) {
-      console.error('Failed to increment video views:', error);
-    }
-  }, [queryClient]);
-
-  // Handle video upload
+  // Handle file upload
   const uploadVideoFile = useCallback(async (file, onUploadProgress) => {
     try {
       const response = await videoService.uploadVideoFile(file, onUploadProgress);
       return response;
     } catch (error) {
-      console.error('Failed to upload video file:', error);
+      console.error('Error uploading video file:', error);
       throw error;
     }
   }, []);
@@ -149,23 +121,17 @@ export const VideoProvider = ({ children }) => {
     currentPage: searchParams.page,
     isLoadingVideos,
     isVideosError,
-    availableTags,
+    videosError,
     searchParams,
     
     // Actions
     getVideo,
+    createVideo,
+    updateVideo,
+    deleteVideo,
     handleSearch,
     handlePageChange,
-    handleViewIncrement,
     uploadVideoFile,
-    
-    // Mutations
-    createVideo: createVideoMutation.mutateAsync,
-    updateVideo: updateVideoMutation.mutateAsync,
-    deleteVideo: deleteVideoMutation.mutate,
-    isCreating: createVideoMutation.isLoading,
-    isUpdating: updateVideoMutation.isLoading,
-    isDeleting: deleteVideoMutation.isLoading,
   };
 
   return (
@@ -177,7 +143,7 @@ export const VideoProvider = ({ children }) => {
 
 export const useVideo = () => {
   const context = useContext(VideoContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useVideo must be used within a VideoProvider');
   }
   return context;

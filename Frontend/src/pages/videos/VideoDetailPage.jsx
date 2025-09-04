@@ -6,16 +6,18 @@ import Button from '../../components/common/Button';
 import { format } from 'date-fns';
 import { PencilIcon, TrashIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
 
 const VideoDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [isDeleting, setIsDeleting] = useState(false);
   
   const {
     getVideo,
     deleteVideo,
-    handleViewIncrement,
+    incrementVideoViews,
     isUpdating,
     isDeleting: isDeletingContext,
   } = useVideo();
@@ -23,36 +25,40 @@ const VideoDetailPage = () => {
   const [video, setVideo] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [relatedVideos, setRelatedVideos] = useState([]);
 
   // Fetch video data
   useEffect(() => {
     const fetchVideo = async () => {
       try {
         setIsLoading(true);
-        const data = await getVideo(id);
-        setVideo(data);
+        const videoData = await getVideo(id);
+        setVideo(videoData);
+        
+        // Increment view count
+        if (isAuthenticated) {
+          await incrementVideoViews(id);
+        }
+        
+        // Fetch related videos (you'll need to implement this in your API)
+        // const related = await getRelatedVideos(id, videoData.tags);
+        // setRelatedVideos(related);
+        
         setError(null);
       } catch (err) {
         console.error('Error fetching video:', err);
         setError('Failed to load video. Please try again later.');
+        toast.error('Failed to load video');
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchVideo();
-  }, [id, getVideo]);
+  }, [id, isAuthenticated]);
 
-  // Handle view increment when video is loaded
-  useEffect(() => {
-    if (video) {
-      handleViewIncrement(video._id);
-    }
-  }, [video, handleViewIncrement]);
-
-  // Handle delete video
   const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this video? This action cannot be undone.')) {
+    if (window.confirm('Are you sure you want to delete this video?')) {
       try {
         setIsDeleting(true);
         await deleteVideo(id);
@@ -60,31 +66,27 @@ const VideoDetailPage = () => {
         navigate('/videos');
       } catch (error) {
         console.error('Error deleting video:', error);
-        toast.error(error.response?.data?.message || 'Failed to delete video');
+        toast.error('Failed to delete video');
+      } finally {
         setIsDeleting(false);
       }
     }
   };
 
-  // Loading state
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
-          <div className="aspect-video bg-gray-200 rounded-lg mb-6"></div>
-          <div className="space-y-4">
-            <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-          </div>
+          <div className="h-8 w-1/4 bg-gray-200 rounded mb-6"></div>
+          <div className="aspect-w-16 aspect-h-9 bg-gray-200 rounded-lg mb-6"></div>
+          <div className="h-6 w-3/4 bg-gray-200 rounded mb-4"></div>
+          <div className="h-4 w-1/2 bg-gray-200 rounded"></div>
         </div>
       </div>
     );
   }
 
-  // Error state
-  if (error || !video) {
+  if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="bg-red-50 border-l-4 border-red-400 p-4">
@@ -95,22 +97,26 @@ const VideoDetailPage = () => {
               </svg>
             </div>
             <div className="ml-3">
-              <p className="text-sm text-red-700">
-                {error || 'Video not found'}
-              </p>
+              <p className="text-sm text-red-700">{error}</p>
             </div>
           </div>
         </div>
-        <div className="mt-6">
-          <Button
-            onClick={() => navigate('/videos')}
-            variant="outline"
-            className="flex items-center"
-          >
-            <ArrowLeftIcon className="h-4 w-4 mr-2" />
-            Back to Videos
+        <div className="mt-4">
+          <Button onClick={() => window.location.reload()} variant="outline">
+            Try Again
           </Button>
         </div>
+      </div>
+    );
+  }
+
+  if (!video) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <p>Video not found</p>
+        <Button onClick={() => navigate('/videos')} className="mt-4">
+          Back to Videos
+        </Button>
       </div>
     );
   }
@@ -120,81 +126,79 @@ const VideoDetailPage = () => {
       <div className="mb-6">
         <Button
           onClick={() => navigate(-1)}
-          variant="outline"
-          className="flex items-center mb-6"
+          variant="ghost"
+          className="flex items-center text-gray-600 hover:text-gray-900"
         >
-          <ArrowLeftIcon className="h-4 w-4 mr-2" />
-          Back
+          <ArrowLeftIcon className="h-5 w-5 mr-2" />
+          Back to Videos
         </Button>
       </div>
 
-      {/* Video Player */}
-      <div className="bg-black rounded-lg overflow-hidden mb-8">
-        <VideoPlayer
-          src={video.url}
-          poster={video.thumbnailUrl}
-          autoPlay
-          className="w-full h-auto"
-        />
-      </div>
-
-      {/* Video Info */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
+        {/* Video Player */}
+        <div className="aspect-w-16 aspect-h-9 bg-black">
+          <VideoPlayer
+            src={video.videoUrl}
+            poster={video.thumbnailUrl}
+            autoPlay
+            className="w-full h-full"
+          />
+        </div>
+
+        {/* Video Info */}
         <div className="p-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2 md:mb-0">
-              {video.title}
-            </h1>
-            <div className="flex space-x-2">
-              <Button
-                as={Link}
-                to={`/videos/${video._id}/edit`}
-                variant="outline"
-                className="flex items-center"
-                disabled={isUpdating || isDeleting}
-              >
-                <PencilIcon className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
-              <Button
-                onClick={handleDelete}
-                variant="danger"
-                className="flex items-center"
-                disabled={isDeleting || isDeletingContext}
-                loading={isDeleting}
-              >
-                <TrashIcon className="h-4 w-4 mr-2" />
-                Delete
-              </Button>
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">{video.title}</h1>
+              <div className="flex items-center text-sm text-gray-500 mb-4">
+                <span>{video.views} views</span>
+                <span className="mx-2">•</span>
+                <span>{format(new Date(video.createdAt), 'MMM d, yyyy')}</span>
+              </div>
             </div>
-          </div>
 
-          <div className="flex items-center text-sm text-gray-500 mb-4">
-            <span>Uploaded on {format(new Date(video.createdAt), 'MMM d, yyyy')}</span>
-            {video.views > 0 && (
-              <span className="mx-2">•</span>
-            )}
-            {video.views > 0 && (
-              <span>{video.views} views</span>
+            {isAuthenticated && (
+              <div className="flex space-x-2">
+                <Button
+                  onClick={() => navigate(`/videos/${video._id}/edit`)}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center"
+                >
+                  <PencilIcon className="h-4 w-4 mr-1" />
+                  Edit
+                </Button>
+                <Button
+                  onClick={handleDelete}
+                  variant="danger"
+                  size="sm"
+                  className="flex items-center"
+                  disabled={isDeleting || isDeletingContext}
+                >
+                  <TrashIcon className="h-4 w-4 mr-1" />
+                  {isDeleting || isDeletingContext ? 'Deleting...' : 'Delete'}
+                </Button>
+              </div>
             )}
           </div>
 
-          {video.description && (
-            <div className="prose max-w-none">
-              <p className="text-gray-700 whitespace-pre-line">
-                {video.description}
-              </p>
-            </div>
-          )}
+          {/* Video Description */}
+          <div className="mt-4">
+            <h3 className="text-sm font-medium text-gray-900">Description</h3>
+            <p className="mt-1 text-sm text-gray-600 whitespace-pre-line">
+              {video.description || 'No description provided.'}
+            </p>
+          </div>
 
+          {/* Tags */}
           {video.tags && video.tags.length > 0 && (
-            <div className="mt-6">
+            <div className="mt-4">
               <h3 className="text-sm font-medium text-gray-900 mb-2">Tags</h3>
               <div className="flex flex-wrap gap-2">
                 {video.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
                   >
                     {tag}
                   </span>
@@ -204,6 +208,34 @@ const VideoDetailPage = () => {
           )}
         </div>
       </div>
+
+      {/* Related Videos */}
+      {relatedVideos.length > 0 && (
+        <div className="mt-12">
+          <h2 className="text-xl font-bold text-gray-900 mb-6">Related Videos</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {relatedVideos.map((relatedVideo) => (
+              <div key={relatedVideo._id} className="bg-white rounded-lg shadow overflow-hidden">
+                <div className="aspect-w-16 aspect-h-9 bg-gray-200">
+                  <img
+                    src={relatedVideo.thumbnailUrl}
+                    alt={relatedVideo.title}
+                    className="object-cover w-full h-full"
+                  />
+                </div>
+                <div className="p-4">
+                  <h3 className="font-medium text-gray-900 line-clamp-2">
+                    {relatedVideo.title}
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {relatedVideo.views} views • {format(new Date(relatedVideo.createdAt), 'MMM d, yyyy')}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

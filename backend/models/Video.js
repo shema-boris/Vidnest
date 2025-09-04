@@ -9,94 +9,108 @@ const videoSchema = new mongoose.Schema(
     },
     title: {
       type: String,
-      required: [true, 'Please add a title'],
+      required: true,
       trim: true,
-      maxlength: [100, 'Title cannot be more than 100 characters'],
     },
     description: {
       type: String,
-      maxlength: [1000, 'Description cannot be more than 1000 characters'],
+      trim: true,
+      default: '',
     },
     url: {
       type: String,
-      required: [true, 'Please add a URL'],
-      trim: true,
-    },
-    platform: {
-      type: String,
-      required: [true, 'Please specify the platform'],
-      enum: ['youtube', 'tiktok', 'instagram', 'other'],
+      required: true,
     },
     thumbnail: {
       type: String,
       default: '',
     },
     duration: {
-      type: Number, // Duration in seconds
+      type: Number, // in seconds
       default: 0,
     },
-    views: {
-      type: Number,
-      default: 0,
+    platform: {
+      type: String,
+      enum: ['youtube', 'tiktok', 'instagram', 'other'],
+      default: 'other',
     },
-    isPublic: {
-      type: Boolean,
-      default: false,
-    },
-    categories: [
-      {
-        type: String,
-        trim: true,
-        lowercase: true,
-      },
-    ],
-    tags: [
-      {
-        type: String,
-        trim: true,
-        lowercase: true,
-      },
-    ],
+    tags: [{
+      type: String,
+      trim: true,
+      lowercase: true,
+    }],
     metadata: {
-      // Platform-specific metadata
-      type: Map,
-      of: String,
+      videoId: String,
+      channelTitle: String,
+      publishedAt: Date,
     },
   },
   {
     timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
   }
 );
 
-// Indexes for better query performance
+// Indexes for faster querying
+videoSchema.index({ user: 1 });
 videoSchema.index({ user: 1, platform: 1 });
-videoSchema.index({ categories: 1 });
-videoSchema.index({ tags: 1 });
-videoSchema.index({ user: 1, url: 1 }, { unique: true }); // Add unique compound index
+videoSchema.index({ user: 1, tags: 1 });
+videoSchema.index({ title: 'text', description: 'text' });
 
-// Static method to get videos by platform
+// Get videos by platform for a specific user
 videoSchema.statics.getVideosByPlatform = async function (userId, platform) {
-  return await this.find({ user: userId, platform });
+  return this.find({ user: userId, platform });
 };
 
-// Static method to get videos by category
-videoSchema.statics.getVideosByCategory = async function (userId, category) {
-  return await this.find({ user: userId, categories: category.toLowerCase() });
+// Get videos by tag for a specific user
+videoSchema.statics.getVideosByTag = async function (userId, tag) {
+  return this.find({ user: userId, tags: tag });
 };
 
-// Static method to search videos
+// Search videos by title or description for a specific user
 videoSchema.statics.searchVideos = async function (userId, query) {
-  return await this.find({
-    user: userId,
-    $or: [
-      { title: { $regex: query, $options: 'i' } },
-      { description: { $regex: query, $options: 'i' } },
-      { categories: { $regex: query, $options: 'i' } },
-      { tags: { $regex: query, $options: 'i' } },
-    ],
-  });
+  return this.find(
+    {
+      user: userId,
+      $text: { $search: query },
+    },
+    { score: { $meta: 'textScore' } }
+  ).sort({ score: { $meta: 'textScore' } });
+};
+
+// Add a tag to a video
+videoSchema.methods.addTag = function (tag) {
+  const tagLower = tag.trim().toLowerCase();
+  if (!this.tags.includes(tagLower)) {
+    this.tags.push(tagLower);
+  }
+  return this.save();
+};
+
+// Remove a tag from a video
+videoSchema.methods.removeTag = function (tag) {
+  const tagLower = tag.trim().toLowerCase();
+  this.tags = this.tags.filter(t => t !== tagLower);
+  return this.save();
+};
+
+// Check if video has a specific tag
+videoSchema.methods.hasTag = function (tag) {
+  const tagLower = tag.trim().toLowerCase();
+  return this.tags.includes(tagLower);
+};
+
+// Format duration from seconds to HH:MM:SS
+videoSchema.methods.formatDuration = function () {
+  const hours = Math.floor(this.duration / 3600);
+  const minutes = Math.floor((this.duration % 3600) / 60);
+  const seconds = this.duration % 60;
+  
+  const parts = [];
+  if (hours > 0) parts.push(hours.toString().padStart(2, '0'));
+  parts.push(minutes.toString().padStart(2, '0'));
+  parts.push(seconds.toString().padStart(2, '0'));
+  
+  return parts.join(':');
 };
 
 const Video = mongoose.model('Video', videoSchema);

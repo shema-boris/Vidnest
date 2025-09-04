@@ -16,7 +16,7 @@ const PublicRoute = () => {
     );
   }
 
-  return user ? <Navigate to="/videos" replace /> : <Outlet />;
+  return user ? <Navigate to="/dashboard" replace /> : <Outlet />;
 };
 
 export default PublicRoute;

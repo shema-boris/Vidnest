@@ -1,93 +1,100 @@
 import Video from '../models/Video.js';
-import { extractVideoId } from '../utils/videoUtils.js';
+import { validationResult } from 'express-validator';
 
-// @desc    Get all videos
+// @desc    Get all videos for the authenticated user
 // @route   GET /api/videos
 // @access  Private
 export const getVideos = async (req, res) => {
   try {
-    const videos = await Video.find({ user: req.user._id });
-    res.json(videos);
+    const { query = '', tags = [], sort = '-createdAt', page = 1, limit = 12 } = req.query;
+    
+    // Build query object
+    const queryObj = { user: req.user.id };
+    
+    // Add search query
+    if (query) {
+      queryObj.$or = [
+        { title: { $regex: query, $options: 'i' } },
+        { description: { $regex: query, $options: 'i' } },
+      ];
+    }
+    
+    // Add tags filter
+    if (tags && tags.length > 0) {
+      queryObj.tags = { $all: Array.isArray(tags) ? tags : [tags] };
+    }
+    
+    // Execute query
+    const videos = await Video.find(queryObj)
+      .sort(sort)
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .lean();
+    
+    // Get total count for pagination
+    const total = await Video.countDocuments(queryObj);
+    
+    res.json({
+      videos,
+      total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+    });
+    
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error fetching videos:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
-// @desc    Get single video
+// @desc    Get a single video by ID
 // @route   GET /api/videos/:id
 // @access  Private
 export const getVideoById = async (req, res) => {
   try {
-    const video = await Video.findOne({
-      _id: req.params.id,
-      user: req.user._id,
-    });
-
+    const video = await Video.findOne({ _id: req.params.id, user: req.user.id });
+    
     if (!video) {
       return res.status(404).json({ message: 'Video not found' });
     }
-
-    // Increment views
-    video.views += 1;
-    await video.save();
-
+    
     res.json(video);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error fetching video:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
-// @desc    Create a video
+// @desc    Create a new video
 // @route   POST /api/videos
 // @access  Private
 export const createVideo = async (req, res) => {
+  // Check for validation errors
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  
   try {
-    const { url, title, description, platform, categories, tags, isPublic } = req.body;
-
-    // Check if video with this URL already exists for the user
-    const existingVideo = await Video.findOne({ 
-      user: req.user._id, 
-      url: url.trim() 
-    });
-
-    if (existingVideo) {
-      return res.status(400).json({ 
-        message: 'This video has already been added to your collection' 
-      });
-    }
-
-    // Extract video ID if it's a known platform
-    const videoId = extractVideoId(url, platform);
+    const { title, url, thumbnail, duration, platform, tags = [] } = req.body;
     
+    // Create new video
     const video = new Video({
-      user: req.user._id,
-      url: url.trim(),
-      title: title?.trim() || 'Untitled Video',
-      description: description?.trim() || '',
-      platform: platform || 'other',
-      categories: Array.isArray(categories) 
-        ? categories.map(cat => cat.trim().toLowerCase()).filter(Boolean)
-        : [],
-      tags: Array.isArray(tags) 
-        ? tags.map(tag => tag.trim().toLowerCase()).filter(Boolean)
-        : [],
-      isPublic: isPublic || false,
-      metadata: {
-        videoId,
-      },
+      user: req.user.id,
+      title,
+      url,
+      thumbnail,
+      duration,
+      platform,
+      tags,
     });
-
-    const createdVideo = await video.save();
-    res.status(201).json(createdVideo);
+    
+    await video.save();
+    
+    res.status(201).json(video);
   } catch (error) {
-    if (error.code === 11000) { // MongoDB duplicate key error
-      return res.status(400).json({ 
-        message: 'This video has already been added to your collection' 
-      });
-    }
-    res.status(500).json({ 
-      message: error.message || 'Error adding video. Please try again.' 
-    });
+    console.error('Error creating video:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -96,40 +103,30 @@ export const createVideo = async (req, res) => {
 // @access  Private
 export const updateVideo = async (req, res) => {
   try {
-    const { title, description, categories, tags, isPublic } = req.body;
-
-    const video = await Video.findOne({
-      _id: req.params.id,
-      user: req.user._id,
-    });
-
+    const { title, description, tags = [] } = req.body;
+    
+    // Find video and verify ownership
+    let video = await Video.findById(req.params.id);
+    
     if (!video) {
       return res.status(404).json({ message: 'Video not found' });
     }
-
+    
+    if (video.user.toString() !== req.user.id) {
+      return res.status(401).json({ message: 'Not authorized' });
+    }
+    
+    // Update fields
     video.title = title || video.title;
     video.description = description || video.description;
+    video.tags = tags;
     
-    if (categories) {
-      video.categories = Array.isArray(categories)
-        ? categories.map(cat => cat.trim().toLowerCase())
-        : [];
-    }
+    await video.save();
     
-    if (tags) {
-      video.tags = Array.isArray(tags)
-        ? tags.map(tag => tag.trim().toLowerCase())
-        : [];
-    }
-    
-    if (typeof isPublic !== 'undefined') {
-      video.isPublic = isPublic;
-    }
-
-    const updatedVideo = await video.save();
-    res.json(updatedVideo);
+    res.json(video);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error updating video:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -138,131 +135,32 @@ export const updateVideo = async (req, res) => {
 // @access  Private
 export const deleteVideo = async (req, res) => {
   try {
-    const video = await Video.findOne({
-      _id: req.params.id,
-      user: req.user._id,
-    });
-
+    // Find video and verify ownership
+    const video = await Video.findOne({ _id: req.params.id, user: req.user.id });
+    
     if (!video) {
       return res.status(404).json({ message: 'Video not found' });
     }
-
-    await Video.deleteOne({ _id: video._id });
+    
+    // Delete the video
+    await Video.findByIdAndDelete(req.params.id);
+    
     res.json({ message: 'Video removed' });
   } catch (error) {
-    console.error("Delete Video Error:", error.message);
-    res.status(500).json({ message: error.message });
+    console.error('Error deleting video:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
-// @desc    Get videos by platform
-// @route   GET /api/videos/platform/:platform
-// @access  Private
-export const getVideosByPlatform = async (req, res) => {
-  try {
-    const videos = await Video.getVideosByPlatform(
-      req.user._id,
-      req.params.platform
-    );
-    res.json(videos);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// @desc    Get videos by category
-// @route   GET /api/videos/category/:category
-// @access  Private
-export const getVideosByCategory = async (req, res) => {
-  try {
-    const videos = await Video.getVideosByCategory(
-      req.user._id,
-      req.params.category
-    );
-    res.json(videos);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// @desc    Search videos
-// @route   GET /api/videos/search?q=:query
-// @access  Private
-export const searchVideos = async (req, res) => {
-  try {
-    const query = req.query.q;
-    if (!query) {
-      return res.status(400).json({ message: 'Search query is required' });
-    }
-
-    const videos = await Video.searchVideos(req.user._id, query);
-    res.json(videos);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// @desc    Get all public videos
-// @route   GET /api/videos/public
-// @access  Public
-export const getPublicVideos = async (req, res) => {
-  try {
-    const videos = await Video.find({ isPublic: true }).populate('user', 'username');
-    res.json(videos);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// @desc    Get single public video by ID
-// @route   GET /api/videos/public/:id
-// @access  Public
-export const getPublicVideoById = async (req, res) => {
-  try {
-    const video = await Video.findOne({ _id: req.params.id, isPublic: true }).populate('user', 'username');
-
-    if (!video) {
-      return res.status(404).json({ message: 'Video not found' });
-    }
-
-    // Increment views
-    video.views += 1;
-    await video.save();
-
-    res.json(video);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// @desc    Get all unique tags from public videos
+// @desc    Get all unique tags from user's videos
 // @route   GET /api/videos/tags
-// @access  Public
-export const getAllTags = async (req, res) => {
+// @access  Private
+export const getVideoTags = async (req, res) => {
   try {
-    const tags = await Video.distinct('tags', { isPublic: true });
+    const tags = await Video.distinct('tags', { user: req.user.id });
     res.json(tags);
   } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// @desc    Increment video views
-// @route   POST /api/videos/:id/views
-// @access  Public
-export const incrementViews = async (req, res) => {
-  try {
-    const video = await Video.findById(req.params.id);
-
-    if (!video) {
-      return res.status(404).json({ message: 'Video not found' });
-    }
-
-    video.views = (video.views || 0) + 1;
-    await video.save();
-
-    res.status(200).json({ message: 'View count updated', views: video.views });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error fetching video tags:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };

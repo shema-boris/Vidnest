@@ -165,7 +165,7 @@ const LoginPage = () => {
                 size="lg"
                 className="w-full justify-center"
                 disabled={isLoading}
-                isLoading={isLoading}
+                loading={isLoading}
               >
                 {isLoading ? 'Signing in...' : 'Sign in'}
               </Button>

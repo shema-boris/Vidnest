@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster } from 'react-hot-toast';
@@ -8,6 +8,7 @@ import ErrorBoundary from './components/common/ErrorBoundary';
 import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import PublicRoute from './components/auth/PublicRoute';
+import LandingPage from './pages/LandingPage';
 import Home from './pages/Home';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
@@ -35,8 +36,11 @@ function App() {
           <AuthProvider>
             <VideoProvider>
               <Routes>
-                {/* Public routes (accessible only when not logged in) */}
-                <Route element={<PublicRoute />}>
+                {/* Public routes (accessible to everyone) */}
+                <Route path="/" element={<LandingPage />} />
+                
+                {/* Auth routes (accessible only when not logged in) */}
+                <Route element={<PublicRoute redirectTo="/dashboard" />}>
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
                 </Route>
@@ -44,7 +48,7 @@ function App() {
                 {/* Protected routes (accessible only when logged in) */}
                 <Route element={<ProtectedRoute />}>
                   <Route element={<Layout />}>
-                    <Route path="/" element={<Home />} />
+                    <Route path="/dashboard" element={<Home />} />
                     <Route path="/videos" element={<VideoListPage />} />
                     <Route path="/videos/add" element={<AddVideoPage />} />
                     <Route path="/videos/:id" element={<VideoDetailPage />} />
@@ -53,27 +57,25 @@ function App() {
                   </Route>
                 </Route>
 
-                {/* 404 route */}
+                {/* 404 - Not Found */}
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
-              
-              <Toaster 
-                position="top-right"
-                toastOptions={{
-                  duration: 4000,
-                  style: {
-                    background: '#363636',
-                    color: '#fff',
-                  },
-                }}
-              />
-              
-              {process.env.NODE_ENV === 'development' && (
-                <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
-              )}
             </VideoProvider>
           </AuthProvider>
         </Router>
+        {process.env.NODE_ENV === 'development' && (
+          <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
+        )}
+        <Toaster 
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: '#363636',
+              color: '#fff',
+            },
+          }}
+        />
       </QueryClientProvider>
     </ErrorBoundary>
   );

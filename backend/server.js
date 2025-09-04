@@ -25,13 +25,13 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || origin.startsWith('http://localhost')) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:3000',  // Local development
+    'https://vidnest-esw2q4p00-vidnest.vercel.app',  //  Vercel domain
+    'https://vidnest.vercel.app'  //  production domain (if different)
+  ],
   credentials: true,
 }));
 

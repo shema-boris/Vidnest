@@ -21,7 +21,6 @@ const videoData = {
   description: 'This is a test video',
   url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
   platform: 'youtube',
-  categories: ['test', 'demo'],
   tags: ['test', 'video'],
 };
 
@@ -81,8 +80,9 @@ describe('Video API', () => {
         .set('Authorization', `Bearer ${authToken}`);
       
       expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body)).toBeTruthy();
-      expect(res.body.length).toBeGreaterThan(0);
+      expect(res.body).toHaveProperty('videos');
+      expect(Array.isArray(res.body.videos)).toBeTruthy();
+      expect(res.body.videos.length).toBeGreaterThan(0);
     });
   });
 
@@ -95,7 +95,6 @@ describe('Video API', () => {
       
       expect(res.statusCode).toBe(200);
       expect(res.body).toHaveProperty('_id', testVideo._id);
-      expect(res.body.views).toBe(1); // Should increment views
     });
   });
 
@@ -105,7 +104,7 @@ describe('Video API', () => {
       const updatedData = {
         title: 'Updated Test Video',
         description: 'Updated description',
-        isPublic: true,
+        tags: ['updated', 'video'],
       };
       
       const res = await request(app)
@@ -116,7 +115,7 @@ describe('Video API', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body.title).toBe(updatedData.title);
       expect(res.body.description).toBe(updatedData.description);
-      expect(res.body.isPublic).toBe(true);
+      expect(res.body.tags).toEqual(expect.arrayContaining(updatedData.tags));
     });
   });
 
