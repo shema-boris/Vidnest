@@ -1,8 +1,14 @@
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
-// Get the base URL and ensure it ends with /api
+// Determine the base URL based on the environment
 const getBaseUrl = () => {
+  // In development, use the proxy defined in vite.config.js
+  if (import.meta.env.DEV) {
+    return '/api'; // This will be prefixed to all requests in development
+  }
+  
+  // In production, use the VITE_API_URL environment variable
   const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
   return baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
 };
