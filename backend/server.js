@@ -6,6 +6,7 @@ import connectDB from './config/db.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import authRoutes from './routes/authRoutes.js';
 import videoRoutes from './routes/videoRoutes.js';
+import previewRoutes from './routes/previewRoutes.js';
 
 // Load environment variables
 const result = dotenv.config();
@@ -72,6 +73,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/videos', videoRoutes);
+app.use('/api/preview', previewRoutes);
 
 // -------------------- Error Handling --------------------
 app.use(notFound);

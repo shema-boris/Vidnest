@@ -44,12 +44,18 @@ const VideoGrid = ({
   // Handle loading state
   if (isLoading && videos.length === 0) {
     return (
-      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-${columns['2xl']} gap-${gap} ${className}`}>
-        {[...Array(8)].map((_, i) => (
-          <div key={i} className="animate-pulse">
-            <div className="aspect-video bg-gray-200 rounded-lg mb-2"></div>
-            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-            <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+        {[...Array(12)].map((_, i) => (
+          <div key={i} className="animate-pulse space-y-3">
+            <div className="aspect-video bg-gray-200 rounded-xl"></div>
+            <div className="flex space-x-3">
+              <div className="h-9 w-9 rounded-full bg-gray-200"></div>
+              <div className="flex-1 space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-4/5"></div>
+                <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            </div>
           </div>
         ))}
       </div>
@@ -77,12 +83,12 @@ const VideoGrid = ({
   // Generate responsive grid class names
   const gridClassNames = [
     'grid',
-    `grid-cols-${columns.sm || 1}`,
-    columns.md && `md:grid-cols-${columns.md}`,
-    columns.lg && `lg:grid-cols-${columns.lg}`,
-    columns.xl && `xl:grid-cols-${columns.xl}`,
-    columns['2xl'] && `2xl:grid-cols-${columns['2xl']}`,
-    `gap-${gap}`,
+    'grid-cols-1',
+    'sm:grid-cols-2',
+    'lg:grid-cols-3',
+    'xl:grid-cols-4',
+    '2xl:grid-cols-5',
+    'gap-6',
     className
   ].filter(Boolean).join(' ');
 
@@ -99,7 +105,7 @@ const VideoGrid = ({
       
       {/* Loading more indicator */}
       {isLoadingMore && (
-        <div className="flex justify-center py-4">
+        <div className="flex justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
         </div>
       )}
