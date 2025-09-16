@@ -7,6 +7,7 @@ import {
   HomeIcon,
   VideoCameraIcon,
   PlusIcon,
+  TagIcon,
   ArrowRightOnRectangleIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline';
@@ -16,6 +17,7 @@ const navigation = [
   { name: 'Home', href: '/', icon: HomeIcon },
   { name: 'My Videos', href: '/videos', icon: VideoCameraIcon },
   { name: 'Add Video', href: '/videos/add', icon: PlusIcon },
+  { name: 'Categories', href: '/categories', icon: TagIcon },
 ];
 
 function classNames(...classes) {

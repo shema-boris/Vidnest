@@ -44,6 +44,11 @@ const videoSchema = new mongoose.Schema(
       channelTitle: String,
       publishedAt: Date,
     },
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category',
+      index: true
+    },
   },
   {
     timestamps: true,

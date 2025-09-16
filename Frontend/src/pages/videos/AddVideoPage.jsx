@@ -6,6 +6,7 @@ import Input from '../../components/common/Input';
 import Textarea from '../../components/common/Textarea';
 import FileInput from '../../components/common/FileInput';
 import ProgressBar from '../../components/common/ProgressBar';
+import CategorySelect from '../../components/common/CategorySelect';
 
 const AddVideoPage = () => {
   const { createVideo, uploadVideoFile, isCreating } = useVideo();
@@ -19,7 +20,7 @@ const AddVideoPage = () => {
     formState: { errors, isSubmitting },
     watch,
     reset,
-    setError: setFormError,
+    setValue,
   } = useForm();
 
   const videoFile = watch('videoFile');
@@ -48,24 +49,21 @@ const AddVideoPage = () => {
       }
     }
 
-    if (!finalVideoUrl) {
-      setError('Please provide either a video file or a URL');
-      return;
-    }
-
-    const videoData = {
-      title: data.title?.trim() || 'Untitled Video',
-      description: data.description?.trim() || '',
-      url: finalVideoUrl,
-      tags: data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [],
-      isPublic: true,
-    };
-
     try {
+      const videoData = {
+        title: data.title.trim(),
+        description: data.description?.trim() || '',
+        url: finalVideoUrl,
+        tags: data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(Boolean) : [],
+        category: data.category || null,
+      };
+
       await createVideo(videoData);
       reset();
+      // Optionally show success message or redirect
     } catch (error) {
-      // Error is already handled by the VideoContext
+      console.error('Error creating video:', error);
+      setError(error.message || 'Failed to create video. Please try again.');
     }
   };
 
@@ -115,10 +113,17 @@ const AddVideoPage = () => {
             id="url"
             label="Video URL"
             type="url"
-            {...register('url')}
-            error={errors.url}
-            placeholder="https://example.com/video.mp4"
-            disabled={videoFile && videoFile.length > 0}
+            {...register('url', {
+              required: !videoFile?.[0] ? 'Either video file or URL is required' : false,
+              validate: (value) => {
+                if (!value && !videoFile?.[0]) {
+                  return 'Either video file or URL is required';
+                }
+                return true;
+              },
+            })}
+            error={errors.url?.message}
+            disabled={!!videoFile?.[0]}
           />
 
           <Input
@@ -128,6 +133,17 @@ const AddVideoPage = () => {
             error={errors.tags}
             helpText="Enter comma-separated tags."
           />
+
+          <div>
+            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+              Category
+            </label>
+            <CategorySelect
+              id="category"
+              {...register('category')}
+              className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
 
           <div className="flex justify-end">
             <Button 

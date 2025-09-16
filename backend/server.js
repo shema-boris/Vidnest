@@ -7,6 +7,7 @@ import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import authRoutes from './routes/authRoutes.js';
 import videoRoutes from './routes/videoRoutes.js';
 import previewRoutes from './routes/previewRoutes.js';
+import categoryRoutes from './routes/categoryRoutes.js'; // <-- import category routes
 
 // Load environment variables
 const result = dotenv.config();
@@ -24,14 +25,9 @@ connectDB();
 const app = express();
 
 // -------------------- CORS Setup --------------------
-
-// Apply CORS middleware
 app.use(cors({
   origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, postman)
-    if (!origin) return callback(null, true);
-    
-    // List of allowed origins
+    if (!origin) return callback(null, true); // allow Postman, mobile apps, curl
     const allowedOrigins = [
       'http://localhost:5173',
       'http://localhost:5174',
@@ -39,18 +35,8 @@ app.use(cors({
       'https://vidnest.vercel.app',
       'https://vidnest.onrender.com'
     ];
-    
-    // Allow if in static allowed origins
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      return callback(null, true);
-    }
-    
-    // Allow Vercel preview deployments dynamically
-    if (/^https:\/\/vidnest-[a-z0-9]+-vidnest\.vercel\.app$/.test(origin)) {
-      return callback(null, true);
-    }
-    
-    // Otherwise block
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    if (/^https:\/\/vidnest-[a-z0-9]+-vidnest\.vercel\.app$/.test(origin)) return callback(null, true);
     return callback(new Error(`CORS policy does not allow access from origin: ${origin}`));
   },
   credentials: true,
@@ -61,7 +47,6 @@ app.use(cors({
 // -------------------- Middleware --------------------
 app.use(express.json());
 
-// Logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
@@ -74,6 +59,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/videos', videoRoutes);
 app.use('/api/preview', previewRoutes);
+app.use('/api/categories', categoryRoutes); // <-- mount categories correctly
 
 // -------------------- Error Handling --------------------
 app.use(notFound);

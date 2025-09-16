@@ -1,4 +1,5 @@
 import Video from '../models/Video.js';
+import Category from '../models/Category.js';
 import { validationResult } from 'express-validator';
 
 // @desc    Get all videos for the authenticated user
@@ -29,7 +30,8 @@ export const getVideos = async (req, res) => {
       .sort(sort)
       .limit(limit * 1)
       .skip((page - 1) * limit)
-      .lean();
+      .lean()
+      .populate('category', 'name');
     
     // Get total count for pagination
     const total = await Video.countDocuments(queryObj);
@@ -52,7 +54,8 @@ export const getVideos = async (req, res) => {
 // @access  Private
 export const getVideoById = async (req, res) => {
   try {
-    const video = await Video.findOne({ _id: req.params.id, user: req.user.id });
+    const video = await Video.findOne({ _id: req.params.id, user: req.user.id })
+      .populate('category', 'name');
     
     if (!video) {
       return res.status(404).json({ message: 'Video not found' });
@@ -76,8 +79,16 @@ export const createVideo = async (req, res) => {
   }
   
   try {
-    const { title, url, thumbnail, duration, platform, tags = [] } = req.body;
+    const { title, url, thumbnail, duration, platform, tags = [], category } = req.body;
     
+    // If category is provided, check if it exists
+    if (category) {
+      const categoryExists = await Category.findById(category);
+      if (!categoryExists) {
+        return res.status(400).json({ message: 'Category not found' });
+      }
+    }
+
     // Create new video
     const video = new Video({
       user: req.user.id,
@@ -87,9 +98,11 @@ export const createVideo = async (req, res) => {
       duration,
       platform,
       tags,
+      category: category || null
     });
     
     await video.save();
+    await video.populate('category', 'name');
     
     res.status(201).json(video);
   } catch (error) {
@@ -103,8 +116,16 @@ export const createVideo = async (req, res) => {
 // @access  Private
 export const updateVideo = async (req, res) => {
   try {
-    const { title, description, tags = [] } = req.body;
+    const { title, description, tags = [], category } = req.body;
     
+    // If category is provided, check if it exists
+    if (category) {
+      const categoryExists = await Category.findById(category);
+      if (!categoryExists) {
+        return res.status(400).json({ message: 'Category not found' });
+      }
+    }
+
     // Find video and verify ownership
     let video = await Video.findById(req.params.id);
     
@@ -120,8 +141,10 @@ export const updateVideo = async (req, res) => {
     video.title = title || video.title;
     video.description = description || video.description;
     video.tags = tags;
+    video.category = category || null;
     
     await video.save();
+    await video.populate('category', 'name');
     
     res.json(video);
   } catch (error) {

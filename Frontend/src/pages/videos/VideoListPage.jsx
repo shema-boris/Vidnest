@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useVideo } from '../../contexts/VideoContext';
+import { useCategories } from '../../contexts/CategoryContext';
 import VideoGrid from '../../components/videos/VideoGrid';
 import VideoSearch from '../../components/videos/VideoSearch';
 import Button from '../../components/common/Button';
@@ -14,23 +15,43 @@ import { useAuth } from '../../contexts/AuthContext';
 const VideoListPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const {
-    videos = [],
-    totalVideos = 0,
-    totalPages = 1,
-    currentPage = 1,
-    isLoadingVideos,
-    isVideosError,
-    availableTags = [],
-    searchParams,
-    handleSearch,
-    handlePageChange,
-  } = useVideo();
+  const { videos = [], totalVideos = 0, totalPages = 1, currentPage = 1, isLoadingVideos, isVideosError, availableTags = [], searchParams, handleSearch, handlePageChange } = useVideo();
+  const { categories } = useCategories();
 
   const [localSearch, setLocalSearch] = useState({
     query: searchParams.query || '',
     tags: searchParams.tags || [],
     sort: searchParams.sort || 'newest',
+    category: searchParams.category || '',
+  });
+
+  // Filter and sort videos
+  const filteredVideos = videos.filter((video) => {
+    if (localSearch.query) {
+      const term = localSearch.query.toLowerCase();
+      if (!video.title.toLowerCase().includes(term) && !video.description?.toLowerCase().includes(term) && !video.tags?.some((tag) => tag.toLowerCase().includes(term))) {
+        return false;
+      }
+    }
+
+    if (localSearch.category) {
+      if (!video.category || video.category._id !== localSearch.category) {
+        return false;
+      }
+    }
+
+    return true;
+  }).sort((a, b) => {
+    if (localSearch.sort === 'newest') {
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    } else if (localSearch.sort === 'oldest') {
+      return new Date(a.createdAt) - new Date(b.createdAt);
+    } else if (localSearch.sort === 'title-asc') {
+      return a.title.localeCompare(b.title);
+    } else if (localSearch.sort === 'title-desc') {
+      return b.title.localeCompare(a.title);
+    }
+    return 0;
   });
 
   // Handle search form submission
@@ -64,17 +85,27 @@ const VideoListPage = () => {
     });
   };
 
+  // Handle category selection
+  const handleCategoryChange = (e) => {
+    setLocalSearch(prev => ({
+      ...prev,
+      category: e.target.value
+    }));
+  };
+
   // Handle clear filters
   const handleClearFilters = () => {
     setLocalSearch({
       query: '',
       tags: [],
       sort: 'newest',
+      category: '',
     });
     handleSearch({
       query: '',
       tags: [],
       sort: 'newest',
+      category: '',
       page: 1,
     });
   };
@@ -85,7 +116,7 @@ const VideoListPage = () => {
       handleSearchSubmit();
     }, 500);
     return () => clearTimeout(timer);
-  }, [localSearch.tags, localSearch.sort]);
+  }, [localSearch.tags, localSearch.sort, localSearch.category]);
 
   // Loading state
   if (isLoadingVideos) {
@@ -95,8 +126,10 @@ const VideoListPage = () => {
           <VideoSearch
             searchParams={localSearch}
             availableTags={availableTags}
+            categories={categories}
             onInputChange={handleInputChange}
             onTagToggle={handleTagToggle}
+            onCategoryChange={handleCategoryChange}
             onClearFilters={handleClearFilters}
             onSubmit={handleSearchSubmit}
           />
@@ -120,15 +153,17 @@ const VideoListPage = () => {
   }
 
   // Empty state
-  if (videos.length === 0) {
+  if (filteredVideos.length === 0) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <VideoSearch
             searchParams={localSearch}
             availableTags={availableTags}
+            categories={categories}
             onInputChange={handleInputChange}
             onTagToggle={handleTagToggle}
+            onCategoryChange={handleCategoryChange}
             onClearFilters={handleClearFilters}
             onSubmit={handleSearchSubmit}
           />
@@ -169,14 +204,16 @@ const VideoListPage = () => {
         <VideoSearch
           searchParams={localSearch}
           availableTags={availableTags}
+          categories={categories}
           onInputChange={handleInputChange}
           onTagToggle={handleTagToggle}
+          onCategoryChange={handleCategoryChange}
           onClearFilters={handleClearFilters}
           onSubmit={handleSearchSubmit}
         />
       </div>
 
-      <VideoGrid videos={videos} />
+      <VideoGrid videos={filteredVideos} />
 
       {totalPages > 1 && (
         <div className="mt-8">
