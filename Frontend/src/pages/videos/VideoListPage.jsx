@@ -54,6 +54,38 @@ const VideoListPage = () => {
     return 0;
   });
 
+  // Group videos by category
+  const groupVideosByCategory = (videos) => {
+    const grouped = {};
+    
+    // First, handle videos with categories
+    videos.forEach(video => {
+      if (video.category) {
+        const categoryId = video.category._id || 'uncategorized';
+        if (!grouped[categoryId]) {
+          grouped[categoryId] = {
+            category: video.category,
+            videos: []
+          };
+        }
+        grouped[categoryId].videos.push(video);
+      } else {
+        // Handle videos without categories
+        if (!grouped.uncategorized) {
+          grouped.uncategorized = {
+            category: { name: 'Uncategorized', _id: 'uncategorized' },
+            videos: []
+          };
+        }
+        grouped.uncategorized.videos.push(video);
+      }
+    });
+    
+    return Object.values(grouped);
+  };
+
+  const groupedVideos = groupVideosByCategory(filteredVideos);
+
   // Handle search form submission
   const handleSearchSubmit = (e) => {
     e?.preventDefault();
@@ -190,7 +222,7 @@ const VideoListPage = () => {
   // Main content
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold text-gray-900">All Videos</h1>
         {isAuthenticated && (
           <Button onClick={() => navigate('/videos/add')}>
@@ -213,7 +245,38 @@ const VideoListPage = () => {
         />
       </div>
 
-      <VideoGrid videos={filteredVideos} />
+      {isLoadingVideos ? (
+        <VideoGridSkeleton />
+      ) : isVideosError ? (
+        <ErrorState 
+          message="Failed to load videos" 
+          onRetry={() => window.location.reload()} 
+        />
+      ) : filteredVideos.length === 0 ? (
+        <EmptyState 
+          title="No videos found" 
+          description="Try adjusting your search or add a new video." 
+          action={
+            <Button onClick={() => navigate('/videos/add')}>
+              Add Video
+            </Button>
+          }
+        />
+      ) : (
+        <div className="space-y-12">
+          {groupedVideos.map(({ category, videos: categoryVideos }) => (
+            <div key={category._id} className="space-y-4">
+              <h2 className="text-xl font-semibold text-gray-900">
+                {category.name} <span className="text-sm text-gray-500">({categoryVideos.length})</span>
+              </h2>
+              <VideoGrid 
+                videos={categoryVideos} 
+                onVideoClick={(video) => navigate(`/videos/${video._id}`)}
+              />
+            </div>
+          ))}
+        </div>
+      )}
 
       {totalPages > 1 && (
         <div className="mt-8">

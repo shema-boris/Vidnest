@@ -1,3 +1,5 @@
+
+// src/pages/videos/VideoDetailPage.jsx
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useVideo } from '../../contexts/VideoContext';
@@ -19,7 +21,7 @@ const VideoDetailPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch video data
+  // Fetch video
   useEffect(() => {
     const fetchVideo = async () => {
       try {
@@ -42,8 +44,9 @@ const VideoDetailPage = () => {
     };
 
     fetchVideo();
-  }, [id, isAuthenticated, user?._id]);
+  }, [id, isAuthenticated, user?._id, getVideo, incrementVideoViews]);
 
+  // Delete handler
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this video?')) {
       try {
@@ -51,8 +54,8 @@ const VideoDetailPage = () => {
         await deleteVideo(id);
         toast.success('Video deleted successfully');
         navigate('/videos');
-      } catch (error) {
-        console.error('Error deleting video:', error);
+      } catch (err) {
+        console.error('Error deleting video:', err);
         toast.error('Failed to delete video');
       } finally {
         setIsDeleting(false);
@@ -63,7 +66,7 @@ const VideoDetailPage = () => {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse">
+        <div role="status" className="animate-pulse">
           <div className="h-8 w-1/4 bg-gray-200 rounded mb-6"></div>
           <div className="aspect-w-16 aspect-h-9 bg-gray-200 rounded-lg mb-6"></div>
           <div className="h-6 w-3/4 bg-gray-200 rounded mb-4"></div>
@@ -115,7 +118,7 @@ const VideoDetailPage = () => {
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
-        {/* Video Thumbnail + Link */}
+        {/* Thumbnail */}
         <div className="aspect-w-16 aspect-h-9 bg-black flex items-center justify-center">
           <a
             href={normalizeUrl(video?.url)}
@@ -124,7 +127,7 @@ const VideoDetailPage = () => {
             className="block w-full h-full"
           >
             <img
-              src={video?.thumbnail || "https://via.placeholder.com/640x360?text=Video"}
+              src={video?.thumbnail || 'https://via.placeholder.com/640x360?text=Video'}
               alt={video?.title}
               className="w-full h-full object-cover"
             />
@@ -195,7 +198,7 @@ const VideoDetailPage = () => {
             </div>
           )}
 
-          {/* Metadata */}
+          {/* Details */}
           <div className="border-t border-gray-200 pt-4">
             <h3 className="text-sm font-medium text-gray-900">Details</h3>
             <div className="mt-2 grid grid-cols-2 gap-4 text-sm">

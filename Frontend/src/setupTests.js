@@ -1,43 +1,44 @@
+import { vi } from 'vitest';
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: jest.fn().mockImplementation(query => ({
+  value: vi.fn().mockImplementation(query => ({
     matches: false,
     media: query,
     onchange: null,
-    addListener: jest.fn(), // deprecated
-    removeListener: jest.fn(), // deprecated
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
+    addListener: vi.fn(), // deprecated
+    removeListener: vi.fn(), // deprecated
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
   })),
 });
 
 // Mock scrollTo
-window.scrollTo = jest.fn();
+window.scrollTo = vi.fn();
 
 // Mock IntersectionObserver
-const mockIntersectionObserver = jest.fn();
+const mockIntersectionObserver = vi.fn();
 mockIntersectionObserver.mockReturnValue({
-  observe: () => null,
-  unobserve: () => null,
-  disconnect: () => null,
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
 });
 window.IntersectionObserver = mockIntersectionObserver;
 
 // Mock ResizeObserver
 class ResizeObserver {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
 }
 window.ResizeObserver = ResizeObserver;
 
 // Clean up after each test
 afterEach(() => {
   cleanup();
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
