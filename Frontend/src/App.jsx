@@ -20,6 +20,8 @@ import EditVideoPage from './pages/videos/EditVideoPage';
 import ProfilePage from './pages/user/ProfilePage';
 import NotFoundPage from './pages/NotFoundPage';
 import CategoriesPage from './pages/categories/CategoriesPage';
+import ShareTarget from './pages/ShareTarget';
+import HelpPage from './pages/HelpPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -57,7 +59,10 @@ function App() {
                       <Route path="/videos/:id/edit" element={<EditVideoPage />} />
                       <Route path="/categories" element={<CategoriesPage />} />
                       <Route path="/profile" element={<ProfilePage />} />
+                      <Route path="/help" element={<HelpPage />} />
                     </Route>
+                    {/* Share target route - no layout needed */}
+                    <Route path="/share-target/" element={<ShareTarget />} />
                   </Route>
 
                   {/* 404 */}

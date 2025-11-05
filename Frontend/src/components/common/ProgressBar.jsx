@@ -17,5 +17,5 @@ const ProgressBar = ({ value = 0, className = '' }) => {
     );
   };
   
-  export default ProgressBar;
+export default ProgressBar;
   
