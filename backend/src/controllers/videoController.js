@@ -1,6 +1,7 @@
 import Video from '../models/Video.js';
 import Category from '../models/Category.js';
 import { validationResult } from 'express-validator';
+import { extractVideoMetadata } from '../services/videoImportService.js';
 
 // @desc    Get all videos for the authenticated user
 // @route   GET /api/videos
@@ -71,7 +72,7 @@ export const getVideoById = async (req, res) => {
   }
 };
 
-// @desc    Create a new video
+// @desc    Create a new video with automatic metadata extraction
 // @route   POST /api/videos
 // @access  Private
 export const createVideo = async (req, res) => {
@@ -82,35 +83,85 @@ export const createVideo = async (req, res) => {
   }
   
   try {
-    const { title, url, thumbnail, duration, platform, tags = [], category } = req.body;
+    const { url, title: manualTitle, description: manualDescription, tags: manualTags, category: manualCategoryId } = req.body;
     
-    // If category is provided, check if it exists
-    if (category) {
-      const categoryExists = await Category.findById(category);
-      if (!categoryExists) {
-        return res.status(400).json({ message: 'Category not found' });
+    // Extract metadata from URL
+    console.log(`Extracting metadata for URL: ${url}`);
+    const metadata = await extractVideoMetadata(url);
+    
+    if (!metadata) {
+      return res.status(400).json({ message: 'Failed to extract video metadata from URL' });
+    }
+
+    // Handle category: match existing global category only (never create)
+    let categoryId = null;
+    
+    if (manualCategoryId) {
+      // User provided a specific category ID - verify it exists
+      const categoryExists = await Category.findById(manualCategoryId);
+      if (categoryExists) {
+        categoryId = manualCategoryId;
+      } else {
+        // Invalid category ID - just log and continue without category
+        console.log(`Invalid category ID provided: ${manualCategoryId} - video will have no category`);
+        categoryId = null;
+      }
+    } else if (metadata.suggestedCategory) {
+      // Try to find existing global category (case-insensitive)
+      const category = await Category.findOne({ 
+        name: { $regex: new RegExp(`^${metadata.suggestedCategory}$`, 'i') }
+      });
+      
+      // Only use category if it exists - never auto-create
+      if (category) {
+        categoryId = category._id;
+        console.log(`Matched existing category: ${category.name}`);
+      } else {
+        console.log(`No matching category found for: ${metadata.suggestedCategory} - video will have no category`);
       }
     }
 
-    // Create new video
-    const video = new Video({
+    // Merge extracted metadata with manual overrides (manual takes priority)
+    const videoData = {
       user: req.user.id,
-      title,
-      url,
-      thumbnail,
-      duration,
-      platform,
-      tags,
-      category: category || null
-    });
-    
+      title: manualTitle || metadata.title,
+      description: manualDescription || metadata.description,
+      url: metadata.url,
+      thumbnail: metadata.thumbnail,
+      duration: metadata.duration,
+      platform: metadata.platform,
+      tags: manualTags || metadata.suggestedTags || [],
+      category: categoryId,
+      metadata: {
+        videoId: metadata.videoId,
+        author: metadata.author,
+        publishedAt: metadata.publishedAt
+      }
+    };
+
+    // Create new video
+    const video = new Video(videoData);
     await video.save();
     await video.populate('category', 'name');
     
+    console.log(`Video created successfully: ${video.title}`);
     res.status(201).json(video);
+    
   } catch (error) {
     console.error('Error creating video:', error);
-    res.status(500).json({ message: 'Server error' });
+    
+    // Provide more specific error messages
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ 
+        message: 'Validation error', 
+        errors: Object.values(error.errors).map(e => e.message) 
+      });
+    }
+    
+    res.status(500).json({ 
+      message: 'Server error while creating video',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 

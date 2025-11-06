@@ -31,11 +31,15 @@ router.get('/tags', getVideoTags);
 router.get('/:id', [check('id', 'Invalid video ID').isMongoId()], getVideoById);
 
 // @route   POST /api/videos
-// @desc    Create a new video
+// @desc    Create a new video with automatic metadata extraction
 // @access  Private
 router.post('/', [
-  check('title', 'Title is required').not().isEmpty(),
   check('url', 'Valid URL is required').isURL(),
+  // Title, description, tags, and category are now optional (extracted automatically)
+  check('title').optional().trim(),
+  check('description').optional().trim(),
+  check('tags').optional().isArray(),
+  check('category').optional().isMongoId(),
 ], createVideo);
 
 // @route   PUT /api/videos/:id

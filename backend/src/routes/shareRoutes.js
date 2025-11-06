@@ -7,7 +7,7 @@ const router = express.Router();
 // @desc    Handle shared video content from mobile
 // @route   POST /api/share/process
 // @access  Private
-router.post('/process', async (req, res) => {
+router.post('/process', protect, async (req, res) => {
   try {
     const { url, title, text } = req.body;
     
@@ -47,7 +47,7 @@ router.post('/process', async (req, res) => {
 // @desc    Get metadata for a URL (for preview)
 // @route   GET /api/share/metadata
 // @access  Private
-router.get('/metadata', async (req, res) => {
+router.get('/metadata', protect, async (req, res) => {
   try {
     const { url } = req.query;
     
