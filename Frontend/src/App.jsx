@@ -23,6 +23,7 @@ import CategoriesPage from './pages/categories/CategoriesPage';
 import ShareTarget from './pages/ShareTarget';
 import SharePage from './pages/SharePage';
 import HelpPage from './pages/HelpPage';
+import Feed from './pages/Feed';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -54,6 +55,7 @@ function App() {
                   <Route element={<ProtectedRoute />}>
                     <Route element={<Layout />}>
                       <Route path="/dashboard" element={<Home />} />
+                      <Route path="/feed" element={<Feed />} />
                       <Route path="/videos" element={<VideoListPage />} />
                       <Route path="/videos/add" element={<AddVideoPage />} />
                       <Route path="/videos/:id" element={<VideoDetailPage />} />
