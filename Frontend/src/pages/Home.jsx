@@ -4,6 +4,7 @@ import { useVideo } from '../contexts/VideoContext';
 import QuickImport from '../components/QuickImport';
 import VideoGrid from '../components/videos/VideoGrid';
 import Button from '../components/common/Button';
+import BookmarkletButton from '../components/BookmarkletButton';
 import { PlusIcon } from '@heroicons/react/24/outline';
 
 function Home() {
@@ -41,6 +42,11 @@ function Home() {
       {/* Quick Import Section */}
       <div className="mb-8">
         <QuickImport />
+      </div>
+
+      {/* Bookmarklet Section */}
+      <div className="mb-8">
+        <BookmarkletButton />
       </div>
 
       {/* Recent Videos */}

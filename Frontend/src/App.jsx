@@ -21,6 +21,7 @@ import ProfilePage from './pages/user/ProfilePage';
 import NotFoundPage from './pages/NotFoundPage';
 import CategoriesPage from './pages/categories/CategoriesPage';
 import ShareTarget from './pages/ShareTarget';
+import SharePage from './pages/SharePage';
 import HelpPage from './pages/HelpPage';
 
 const queryClient = new QueryClient({
@@ -61,8 +62,9 @@ function App() {
                       <Route path="/profile" element={<ProfilePage />} />
                       <Route path="/help" element={<HelpPage />} />
                     </Route>
-                    {/* Share target route - no layout needed */}
+                    {/* Share routes - no layout needed */}
                     <Route path="/share-target/" element={<ShareTarget />} />
+                    <Route path="/share" element={<SharePage />} />
                   </Route>
 
                   {/* 404 */}
