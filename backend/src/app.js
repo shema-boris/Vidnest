@@ -6,6 +6,7 @@ import videoRoutes from './routes/videoRoutes.js';
 import previewRoutes from './routes/previewRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import shareRoutes from './routes/shareRoutes.js';
+import feedRoutes from './routes/feedRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 
 const app = express();
@@ -47,6 +48,7 @@ app.use('/api/videos', videoRoutes);
 app.use('/api/preview', previewRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/share', shareRoutes);
+app.use('/api/feed', feedRoutes);
 
 // Errors
 app.use(notFound);
