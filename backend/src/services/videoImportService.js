@@ -35,16 +35,17 @@ export const extractVideoMetadata = async (url) => {
 // @return  {object} - Complete metadata structure
 const enrichMetadata = (metadata, url) => {
   // Ensure all required fields exist
+  const platform = metadata.platform || detectPlatform(url);
   const completeMetadata = {
     title: metadata.title || 'Untitled Video',
     description: metadata.description || '',
-    thumbnail: metadata.thumbnail || getDefaultThumbnail(metadata.platform),
-    platform: metadata.platform || detectPlatform(url),
+    thumbnail: (metadata.thumbnail && metadata.thumbnail.trim() !== '') ? metadata.thumbnail : getDefaultThumbnail(platform, url),
+    platform: platform,
     author: metadata.author || '',
     duration: metadata.duration || 0,
     publishedAt: metadata.publishedAt || new Date().toISOString(),
     url: url,
-    videoId: extractVideoId(url, metadata.platform),
+    videoId: extractVideoId(url, platform),
   };
 
   // Add AI suggestions
@@ -76,15 +77,28 @@ const extractWithMicrolink = async (url) => {
         duration = parseInt(data.video.duration, 10);
       }
 
+      // Get platform and try to build platform-specific thumbnail
+      const platform = detectPlatform(url);
+      let thumbnail = data.image?.url || data.logo?.url || '';
+      
+      // For YouTube, try to build thumbnail from video ID if Microlink didn't provide one
+      if (platform === 'youtube' && (!thumbnail || thumbnail.trim() === '')) {
+        const videoId = extractYouTubeId(url);
+        if (videoId) {
+          // Use hqdefault which is guaranteed to exist for all videos
+          thumbnail = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+        }
+      }
+
       return {
         title: data.title || '',
         description: data.description || '',
-        thumbnail: data.image?.url || data.logo?.url || '',
+        thumbnail: thumbnail,
         author: data.author || data.publisher || '',
-        platform: detectPlatform(url),
+        platform: platform,
         duration: duration,
         publishedAt: data.date || new Date().toISOString(),
-        siteName: data.publisher || detectPlatform(url)
+        siteName: data.publisher || platform
       };
     }
     return null;
@@ -103,7 +117,7 @@ const extractBasicMetadata = (url) => {
   return {
     title: `Video from ${platform}`,
     description: '',
-    thumbnail: getDefaultThumbnail(platform),
+    thumbnail: getDefaultThumbnail(platform, url),
     author: '',
     platform: platform,
     publishedAt: new Date().toISOString(),
@@ -143,16 +157,26 @@ export const detectPlatform = (url) => {
 
 // @desc    Get default thumbnail for platform
 // @param   {string} platform - Platform name
+// @param   {string} url - Optional URL to extract video ID for better thumbnails
 // @return  {string} - Default thumbnail URL
-const getDefaultThumbnail = (platform) => {
+const getDefaultThumbnail = (platform, url = null) => {
+  // Try to generate YouTube thumbnail from video ID
+  if (platform === 'youtube' && url) {
+    const videoId = extractYouTubeId(url);
+    if (videoId) {
+      // Use hqdefault which is guaranteed to exist for all videos (480x360)
+      return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+    }
+  }
+  
   const thumbnails = {
-    youtube: 'https://img.youtube.com/vi/default/maxresdefault.jpg',
-    tiktok: 'https://sf16-website-login.neutral.ttwstatic.com/obj/tiktok_web_login_static/tiktok/webapp/main/webapp-desktop/8152caf0c8e8bc67ae0d.png',
-    instagram: 'https://instagram.com/static/images/ico/favicon.ico/6b01a5c91f02.ico',
-    facebook: 'https://static.xx.fbcdn.net/rsrc.php/v3/yx/r/pyNVUg5EM0j.png',
-    twitter: 'https://abs.twimg.com/favicons/twitter.ico',
-    vimeo: 'https://vimeo.com/favicon.ico',
-    other: 'https://via.placeholder.com/300x200?text=Video'
+    youtube: 'https://via.placeholder.com/1280x720/FF0000/FFFFFF?text=YouTube+Video',
+    tiktok: 'https://via.placeholder.com/720x1280/000000/FFFFFF?text=TikTok+Video',
+    instagram: 'https://via.placeholder.com/1080x1080/E4405F/FFFFFF?text=Instagram+Video',
+    facebook: 'https://via.placeholder.com/1280x720/1877F2/FFFFFF?text=Facebook+Video',
+    twitter: 'https://via.placeholder.com/1280x720/1DA1F2/FFFFFF?text=Twitter+Video',
+    vimeo: 'https://via.placeholder.com/1280x720/1AB7EA/FFFFFF?text=Vimeo+Video',
+    other: 'https://via.placeholder.com/1280x720/6B7280/FFFFFF?text=Video'
   };
   
   return thumbnails[platform] || thumbnails.other;
