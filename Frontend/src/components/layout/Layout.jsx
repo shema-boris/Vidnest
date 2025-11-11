@@ -8,7 +8,6 @@ import {
   VideoCameraIcon,
   PlusIcon,
   TagIcon,
-  RssIcon,
   ArrowRightOnRectangleIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline';
@@ -16,7 +15,6 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const navigation = [
   { name: 'Home', href: '/dashboard', icon: HomeIcon },
-  { name: 'Feed', href: '/feed', icon: RssIcon },
   { name: 'My Videos', href: '/videos', icon: VideoCameraIcon },
   { name: 'Add Video', href: '/videos/add', icon: PlusIcon },
   { name: 'Categories', href: '/categories', icon: TagIcon },
