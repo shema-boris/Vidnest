@@ -1,6 +1,5 @@
 import { EyeIcon, ClockIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/solid';
 import { getPlatformIcon } from '../../utils/platformUtils';
-import RichLinkPreview from '../common/RichLinkPreview';
 
 const VideoCard = ({ video }) => {
   if (!video) return null;
@@ -58,10 +57,6 @@ const VideoCard = ({ video }) => {
   };
 
   const PlatformIcon = getPlatformIcon(platform);
-
-  if (url) {
-    return <RichLinkPreview url={url} className="w-full" />;
-  }
 
   return (
     <a
