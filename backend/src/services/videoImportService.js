@@ -133,21 +133,27 @@ export const detectPlatform = (url) => {
   
   const urlLower = url.toLowerCase();
   
+  // YouTube: youtube.com, youtu.be, m.youtube.com
   if (urlLower.includes('youtube.com') || urlLower.includes('youtu.be')) {
     return 'youtube';
   }
+  // TikTok: tiktok.com, vm.tiktok.com, vt.tiktok.com, m.tiktok.com
   if (urlLower.includes('tiktok.com')) {
     return 'tiktok';
   }
-  if (urlLower.includes('instagram.com')) {
+  // Instagram: instagram.com, instagr.am
+  if (urlLower.includes('instagram.com') || urlLower.includes('instagr.am')) {
     return 'instagram';
   }
-  if (urlLower.includes('facebook.com') || urlLower.includes('fb.com')) {
+  // Facebook: facebook.com, fb.com, fb.watch, m.facebook.com
+  if (urlLower.includes('facebook.com') || urlLower.includes('fb.com') || urlLower.includes('fb.watch')) {
     return 'facebook';
   }
+  // Twitter/X: twitter.com, x.com, mobile.twitter.com
   if (urlLower.includes('twitter.com') || urlLower.includes('x.com')) {
     return 'twitter';
   }
+  // Vimeo: vimeo.com, player.vimeo.com
   if (urlLower.includes('vimeo.com')) {
     return 'vimeo';
   }
@@ -187,8 +193,15 @@ const getDefaultThumbnail = (platform, url = null) => {
 // @return  {string|null} - Video ID or null
 export const extractYouTubeId = (url) => {
   const patterns = [
+    // Standard watch URLs: youtube.com/watch?v=VIDEO_ID
     /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^#\&\?]*).*/,
+    // Mobile URLs: m.youtube.com/watch?v=VIDEO_ID
+    /m\.youtube\.com\/watch\?v=([^#\&\?]*).*/,
+    // Shorts: youtube.com/shorts/VIDEO_ID
+    /youtube\.com\/shorts\/([^#\&\?]*).*/,
+    // Old embed format: youtube.com/v/VIDEO_ID
     /youtube\.com\/v\/([^#\&\?]*).*/,
+    // User uploads: youtube.com/user/.../VIDEO_ID
     /youtube\.com\/user\/[^\/]*\/#\w\/\w\/([^#\&\?]*).*/
   ];
   
@@ -216,7 +229,11 @@ export const extractVideoId = (url, platform) => {
 
       case 'tiktok':
         // TikTok video URLs: tiktok.com/@username/video/1234567890
-        const tiktokMatch = url.match(/\/video\/(\d+)/);
+        // Also handles: vm.tiktok.com/CODE, vt.tiktok.com/CODE
+        let tiktokMatch = url.match(/\/video\/(\d+)/);
+        if (tiktokMatch) return tiktokMatch[1];
+        // Handle short URLs: vm.tiktok.com/ZS... or vt.tiktok.com/ZS...
+        tiktokMatch = url.match(/(?:vm|vt)\.tiktok\.com\/([A-Za-z0-9]+)/);
         return tiktokMatch ? tiktokMatch[1] : null;
 
       case 'instagram':
@@ -226,7 +243,14 @@ export const extractVideoId = (url, platform) => {
 
       case 'facebook':
         // Facebook video URLs vary, try to extract numeric ID
-        const facebookMatch = url.match(/\/videos\/(\d+)/);
+        // Handles: facebook.com/username/videos/123, fb.watch/abc, m.facebook.com/...
+        let facebookMatch = url.match(/\/videos\/(\d+)/);
+        if (facebookMatch) return facebookMatch[1];
+        // Handle fb.watch short URLs
+        facebookMatch = url.match(/fb\.watch\/([A-Za-z0-9_-]+)/);
+        if (facebookMatch) return facebookMatch[1];
+        // Handle story/reel IDs
+        facebookMatch = url.match(/\/(?:reel|story)\/(\d+)/);
         return facebookMatch ? facebookMatch[1] : null;
 
       case 'twitter':
