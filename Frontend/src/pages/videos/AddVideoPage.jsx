@@ -4,50 +4,23 @@ import { useVideo } from '../../contexts/VideoContext';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import Textarea from '../../components/common/Textarea';
-import FileInput from '../../components/common/FileInput';
-import ProgressBar from '../../components/common/ProgressBar';
 import CategorySelect from '../../components/common/CategorySelect';
 
 const AddVideoPage = () => {
-  const { createVideo, uploadVideoFile, isCreating } = useVideo();
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
+  const { createVideo, isCreating } = useVideo();
   const [error, setError] = useState('');
   
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    watch,
     reset,
-    setValue,
   } = useForm();
-
-  const videoFile = watch('videoFile');
-  const videoUrl = watch('url');
 
   const onSubmit = async (data) => {
     setError('');
-    let finalVideoUrl = data.url?.trim();
 
-    if (data.videoFile && data.videoFile[0]) {
-      setIsUploading(true);
-      setUploadProgress(0);
-      try {
-        const response = await uploadVideoFile(data.videoFile[0], (progressEvent) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          setUploadProgress(percentCompleted);
-        });
-        finalVideoUrl = response.fileUrl;
-      } catch (error) {
-        console.error('Error uploading video:', error);
-        setError('Failed to upload video. Please try again.');
-        setIsUploading(false);
-        return;
-      } finally {
-        setIsUploading(false);
-      }
-    }
+    const finalVideoUrl = data.url?.trim();
 
     try {
       const videoData = {
@@ -94,36 +67,14 @@ const AddVideoPage = () => {
             rows={4}
           />
 
-          <div className="text-sm text-gray-500 text-center my-4">— OR —</div>
-
-          <FileInput
-            id="videoFile"
-            label="Upload Video File"
-            {...register('videoFile')}
-            error={errors.videoFile}
-            helpText="Upload a video file directly. This will override the URL field."
-            disabled={isUploading}
-          />
-
-          {isUploading && (
-            <ProgressBar value={uploadProgress} />
-          )}
-
           <Input
             id="url"
             label="Video URL"
             type="url"
             {...register('url', {
-              required: !videoFile?.[0] ? 'Either video file or URL is required' : false,
-              validate: (value) => {
-                if (!value && !videoFile?.[0]) {
-                  return 'Either video file or URL is required';
-                }
-                return true;
-              },
+              required: 'Video URL is required',
             })}
             error={errors.url?.message}
-            disabled={!!videoFile?.[0]}
           />
 
           <Input
@@ -148,10 +99,10 @@ const AddVideoPage = () => {
           <div className="flex justify-end">
             <Button 
               type="submit" 
-              disabled={isSubmitting || isCreating || isUploading}
-              loading={isSubmitting || isCreating || isUploading}
+              disabled={isSubmitting || isCreating}
+              loading={isSubmitting || isCreating}
             >
-              {isUploading ? `Uploading... ${uploadProgress}%` : (isCreating ? 'Creating...' : 'Add Video')}
+              {isCreating ? 'Creating...' : 'Add Video'}
             </Button>
           </div>
         </form>

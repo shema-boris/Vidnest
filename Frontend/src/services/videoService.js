@@ -63,26 +63,6 @@ export const deleteVideo = async (id) => {
   }
 };
 
-// Upload video file
-export const uploadVideoFile = async (file, onUploadProgress) => {
-  try {
-    const formData = new FormData();
-    formData.append('video', file);
-    
-    const response = await api.post('/videos/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      onUploadProgress,
-    });
-    
-    return response.data;
-  } catch (error) {
-    console.error('Error uploading video file:', error);
-    throw error;
-  }
-};
-
 // Get available tags from user's videos
 export const getVideoTags = async () => {
   try {

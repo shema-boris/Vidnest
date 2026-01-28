@@ -48,13 +48,12 @@ export const login = async (req, res) => {
     const user = await User.findOne({ email }).select('+password');
 
     if (user && (await user.matchPassword(password))) {
-      const token = generateToken(res, user._id);
+      generateToken(res, user._id);
       res.json({
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
-        token,
       });
     } else {
       res.status(401).json({ message: 'Invalid email or password' });
@@ -70,6 +69,8 @@ export const login = async (req, res) => {
 export const logout = (req, res) => {
   res.cookie('jwt', '', {
     httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     expires: new Date(0),
   });
   res.status(200).json({ message: 'Logged out successfully' });
@@ -136,8 +137,8 @@ const generateToken = (res, userId) => {
 
   res.cookie('jwt', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV !== 'development', // Use secure in production
-    sameSite: 'strict',
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   });
 

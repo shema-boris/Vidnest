@@ -8,6 +8,7 @@ import Textarea from './common/Textarea';
 import CategorySelect from './common/CategorySelect';
 import Spinner from './common/Spinner';
 import { toast } from 'react-hot-toast';
+import api from '../utils/api';
 
 const QuickImport = ({ onSuccess }) => {
   const navigate = useNavigate();
@@ -31,18 +32,8 @@ const QuickImport = ({ onSuccess }) => {
     setLoading(true);
     try {
       // Extract metadata from URL
-      const response = await fetch(`/api/share/metadata?url=${encodeURIComponent(url)}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('jwt')}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to extract metadata');
-      }
-
-      const result = await response.json();
+      const response = await api.get(`/share/metadata?url=${encodeURIComponent(url)}`);
+      const result = response.data;
       
       if (result.success) {
         const metadata = result.data;

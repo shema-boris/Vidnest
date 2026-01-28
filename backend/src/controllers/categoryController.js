@@ -14,7 +14,7 @@ export const getCategories = async (req, res) => {
 
 // @desc    Create a category
 // @route   POST /api/categories
-// @access  Public
+// @access  Private
 export const createCategory = async (req, res) => {
   try {
     const { name } = req.body;
@@ -37,7 +37,7 @@ export const createCategory = async (req, res) => {
 
 // @desc    Delete a category
 // @route   DELETE /api/categories/:id
-// @access  Public
+// @access  Private
 export const deleteCategory = async (req, res) => {
   try {
     const category = await Category.findByIdAndDelete(req.params.id);

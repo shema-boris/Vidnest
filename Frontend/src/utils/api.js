@@ -22,20 +22,6 @@ const api = axios.create({
   },
 });
 
-// Request interceptor to add auth token to requests
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
 // Response interceptor to handle common errors
 api.interceptors.response.use(
   (response) => {
@@ -52,9 +38,8 @@ api.interceptors.response.use(
 
     // Handle 401 Unauthorized
     if (response.status === 401) {
-      // Clear token and redirect to login if the request was not to the login page
+      // Redirect to login if the request was not to the login page
       if (!window.location.pathname.includes('/login')) {
-        localStorage.removeItem('token');
         window.location.href = '/login';
         toast.error('Your session has expired. Please log in again.');
       }
@@ -73,20 +58,5 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
-// Helper function to handle file uploads
-export const uploadFile = async (file, onUploadProgress) => {
-  const formData = new FormData();
-  formData.append('file', file);
-
-  const response = await api.post('/upload', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-    onUploadProgress,
-  });
-
-  return response.data;
-};
 
 export default api;

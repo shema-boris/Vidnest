@@ -102,17 +102,6 @@ export const VideoProvider = ({ children }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  // Handle file upload
-  const uploadVideoFile = useCallback(async (file, onUploadProgress) => {
-    try {
-      const response = await videoService.uploadVideoFile(file, onUploadProgress);
-      return response;
-    } catch (error) {
-      console.error('Error uploading video file:', error);
-      throw error;
-    }
-  }, []);
-
   const value = {
     // State
     videos: videosData.videos,
@@ -131,7 +120,6 @@ export const VideoProvider = ({ children }) => {
     deleteVideo,
     handleSearch,
     handlePageChange,
-    uploadVideoFile,
   };
 
   return (

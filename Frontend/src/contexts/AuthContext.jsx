@@ -8,6 +8,7 @@ const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -16,17 +17,16 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const token = localStorage.getItem('token');
-        if (token) {
-          // Validate token with the server
-          const { data } = await api.get('/auth/profile');
-          if (data) {
-            setIsAuthenticated(true);
-          }
+        // Validate session with the server (cookie-based auth)
+        const { data } = await api.get('/auth/profile');
+        if (data) {
+          setIsAuthenticated(true);
+          setUser(data);
         }
       } catch (error) {
         console.error('Auth check failed:', error);
-        localStorage.removeItem('token');
+        setIsAuthenticated(false);
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
@@ -40,11 +40,9 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data } = await api.post('/auth/login', { email, password });
       
-      // Store token in localStorage
-      localStorage.setItem('token', data.token);
-      
       // Update auth state immediately
       setIsAuthenticated(true);
+      setUser(data || null);
       
       // Invalidate any existing queries
       await queryClient.invalidateQueries();
@@ -89,8 +87,8 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout error:', error);
     } finally {
       // Clear local storage and state
-      localStorage.removeItem('token');
       setIsAuthenticated(false);
+      setUser(null);
       
       // Clear all queries
       queryClient.clear();
@@ -142,6 +140,7 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         isAuthenticated,
+        user,
         isLoading,
         login,
         register,
