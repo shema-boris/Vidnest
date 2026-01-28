@@ -7,6 +7,8 @@ import {
   logout,
   getUserProfile,
   updateUserProfile,
+  forgotPassword,
+  resetPassword,
 } from '../controllers/authController.js';
 
 const router = express.Router();
@@ -29,6 +31,22 @@ router.post(
     check('password', 'Password is required').exists(),
   ],
   login
+);
+
+// Password reset routes (public)
+router.post(
+  '/forgot-password',
+  [check('email', 'Please include a valid email').isEmail()],
+  forgotPassword
+);
+
+router.post(
+  '/reset-password',
+  [
+    check('token', 'Reset token is required').not().isEmpty(),
+    check('password', 'Please enter a password with 6 or more characters').isLength({ min: 6 }),
+  ],
+  resetPassword
 );
 
 // Protected routes

@@ -5,7 +5,14 @@
 # OS
 .DS_Store
 
-# Node modules (handled by frontend and backend)
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
 
+# Node modules (handled by frontend and backend)
 node_modules/
 .frontend_node_modules_cache/
