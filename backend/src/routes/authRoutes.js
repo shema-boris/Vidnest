@@ -2,6 +2,10 @@ import express from 'express';
 import { check } from 'express-validator';
 import { protect } from '../middleware/auth.js';
 import {
+  forgotPasswordLimiter,
+  loginLimiter,
+} from '../middleware/rateLimitMiddleware.js';
+import {
   register,
   login,
   logout,
@@ -26,6 +30,7 @@ router.post(
 
 router.post(
   '/login',
+  loginLimiter,
   [
     check('email', 'Please include a valid email').isEmail(),
     check('password', 'Password is required').exists(),
@@ -36,6 +41,7 @@ router.post(
 // Password reset routes (public)
 router.post(
   '/forgot-password',
+  forgotPasswordLimiter,
   [check('email', 'Please include a valid email').isEmail()],
   forgotPassword
 );
