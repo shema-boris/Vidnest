@@ -38,8 +38,15 @@ api.interceptors.response.use(
 
     // Handle 401 Unauthorized
     if (response.status === 401) {
-      // Redirect to login if the request was not to the login page
-      if (!window.location.pathname.includes('/login')) {
+      const currentPath = window.location.pathname;
+      const publicAuthPaths = ['/login', '/register', '/forgot-password', '/reset-password'];
+      const isOnPublicAuthPage = publicAuthPaths.some((p) => currentPath.startsWith(p));
+
+      const requestUrl = error.config?.url || '';
+      const isAuthProfileCheck = requestUrl.includes('/auth/profile');
+
+      // Avoid hard-redirecting during expected unauthenticated flows
+      if (!isOnPublicAuthPage && !isAuthProfileCheck) {
         window.location.href = '/login';
         toast.error('Your session has expired. Please log in again.');
       }

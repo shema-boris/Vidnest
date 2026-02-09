@@ -41,3 +41,13 @@ coverage
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+
+#Development documentation and notes (session records)
+REMOVE_ENV_FROM_GIT.md
+PLATFORM_SUPPORT.md
+*_NOTES.md
+*_TODO.md
+progress.txt
+notes.txt
+session-*.md
