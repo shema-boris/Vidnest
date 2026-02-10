@@ -27,6 +27,28 @@
     --popover-foreground: 17 24 39;
   }
 
+  .dark {
+    --background: 17 24 39;
+    --foreground: 243 244 246;
+    --primary: 14 165 233;
+    --primary-foreground: 255 255 255;
+    --secondary: 99 102 241;
+    --secondary-foreground: 255 255 255;
+    --destructive: 239 68 68;
+    --destructive-foreground: 255 255 255;
+    --muted: 31 41 55;
+    --muted-foreground: 156 163 175;
+    --accent: 55 65 81;
+    --accent-foreground: 243 244 246;
+    --border: 55 65 81;
+    --input: 55 65 81;
+    --ring: 59 130 246;
+    --card: 31 41 55;
+    --card-foreground: 243 244 246;
+    --popover: 31 41 55;
+    --popover-foreground: 243 244 246;
+  }
+
   * {
     @apply border-border;
   }
@@ -40,7 +62,7 @@
 
   /* Better typography */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display font-bold tracking-tight text-gray-900;
+    @apply font-display font-bold tracking-tight text-gray-900 dark:text-gray-100;
   }
 
   h1 { @apply text-3xl sm:text-4xl; }
@@ -51,7 +73,7 @@
   h6 { @apply text-sm sm:text-base; }
 
   p {
-    @apply text-gray-700 leading-relaxed;
+    @apply text-gray-700 dark:text-gray-300 leading-relaxed;
   }
 
   /* Form elements */
@@ -68,11 +90,11 @@
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-gray-100 rounded-full;
+    @apply bg-gray-100 dark:bg-gray-800 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-gray-300 rounded-full hover:bg-gray-400 transition-colors;
+    @apply bg-gray-300 dark:bg-gray-600 rounded-full hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors;
   }
 
   /* Remove number input arrows */
@@ -109,11 +131,11 @@
   }
 
   .card {
-    @apply bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden;
+    @apply bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden;
   }
 
   .card-header {
-    @apply p-4 border-b border-gray-200;
+    @apply p-4 border-b border-gray-200 dark:border-gray-700;
   }
 
   .card-content {
@@ -121,7 +143,7 @@
   }
 
   .card-footer {
-    @apply p-4 border-t border-gray-200 bg-gray-50;
+    @apply p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900;
   }
 
   .input {
@@ -181,6 +203,10 @@
 * {
   scrollbar-width: thin;
   scrollbar-color: #9ca3af #f3f4f6;
+}
+
+.dark * {
+  scrollbar-color: #4b5563 #1f2937;
 }
 
 /* Custom focus styles */

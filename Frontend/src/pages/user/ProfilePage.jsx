@@ -97,7 +97,7 @@ const ProfilePage = () => {
       ) : (
         <div className="space-y-6">
           {/* Profile Header Card */}
-          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
             <div className="p-8">
               <div className="text-center">
                 <img
@@ -105,8 +105,8 @@ const ProfilePage = () => {
                   src={`https://api.dicebear.com/6.x/initials/svg?seed=${user.name}`}
                   alt={`${user.name}'s avatar`}
                 />
-                <h1 className="mt-4 text-3xl font-bold text-gray-900">{user.name}</h1>
-                <p className="mt-1 text-md text-gray-500">{user.email}</p>
+                <h1 className="mt-4 text-3xl font-bold text-gray-900 dark:text-gray-100">{user.name}</h1>
+                <p className="mt-1 text-md text-gray-500 dark:text-gray-400">{user.email}</p>
 
                 <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-6 border-t border-gray-200 pt-8">
                   <StatItem label="Total Videos" value={videos?.length || 0} />
@@ -118,10 +118,10 @@ const ProfilePage = () => {
           </div>
 
           {/* Edit Profile Card */}
-          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">Profile Information</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Profile Information</h2>
                 {!isEditingProfile && (
                   <Button variant="outline" size="sm" onClick={handleEditProfile}>
                     <PencilIcon className="h-4 w-4 mr-1" />
@@ -133,7 +133,7 @@ const ProfilePage = () => {
               {isEditingProfile ? (
                 <form onSubmit={handleProfileSubmit} className="space-y-4">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Name
                     </label>
                     <input
@@ -141,12 +141,12 @@ const ProfilePage = () => {
                       type="text"
                       value={profileForm.name}
                       onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
-                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
                       required
                     />
                   </div>
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Email
                     </label>
                     <input
@@ -154,7 +154,7 @@ const ProfilePage = () => {
                       type="email"
                       value={profileForm.email}
                       onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
-                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
                       required
                     />
                   </div>
@@ -171,17 +171,17 @@ const ProfilePage = () => {
                 </form>
               ) : (
                 <div className="space-y-3">
-                  <div className="flex justify-between py-2 border-b border-gray-100">
-                    <span className="text-sm text-gray-500">Name</span>
-                    <span className="text-sm font-medium text-gray-900">{user.name}</span>
+                  <div className="flex justify-between py-2 border-b border-gray-100 dark:border-gray-700">
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Name</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.name}</span>
                   </div>
-                  <div className="flex justify-between py-2 border-b border-gray-100">
-                    <span className="text-sm text-gray-500">Email</span>
-                    <span className="text-sm font-medium text-gray-900">{user.email}</span>
+                  <div className="flex justify-between py-2 border-b border-gray-100 dark:border-gray-700">
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Email</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.email}</span>
                   </div>
                   <div className="flex justify-between py-2">
-                    <span className="text-sm text-gray-500">Role</span>
-                    <span className="text-sm font-medium text-gray-900 capitalize">{user.role || 'user'}</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Role</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100 capitalize">{user.role || 'user'}</span>
                   </div>
                 </div>
               )}
@@ -189,10 +189,10 @@ const ProfilePage = () => {
           </div>
 
           {/* Change Password Card */}
-          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">Password</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Password</h2>
                 {!isChangingPassword && (
                   <Button variant="outline" size="sm" onClick={handleChangePassword}>
                     <KeyIcon className="h-4 w-4 mr-1" />
@@ -204,7 +204,7 @@ const ProfilePage = () => {
               {isChangingPassword ? (
                 <form onSubmit={handlePasswordSubmit} className="space-y-4">
                   <div>
-                    <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       New Password
                     </label>
                     <input
@@ -212,14 +212,14 @@ const ProfilePage = () => {
                       type="password"
                       value={passwordForm.newPassword}
                       onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
                       placeholder="At least 6 characters"
                       required
                       minLength={6}
                     />
                   </div>
                   <div>
-                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Confirm New Password
                     </label>
                     <input
@@ -227,7 +227,7 @@ const ProfilePage = () => {
                       type="password"
                       value={passwordForm.confirmPassword}
                       onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                      className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+                      className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
                       placeholder="Re-enter new password"
                       required
                       minLength={6}
@@ -250,7 +250,7 @@ const ProfilePage = () => {
                   </div>
                 </form>
               ) : (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   Change your password to keep your account secure.
                 </p>
               )}

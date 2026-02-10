@@ -223,7 +223,7 @@ const VideoListPage = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">All Videos</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">All Videos</h1>
         {isAuthenticated && (
           <Button onClick={() => navigate('/videos/add')}>
             <PlusIcon className="h-5 w-5 mr-2" />

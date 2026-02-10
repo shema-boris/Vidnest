@@ -108,12 +108,12 @@ const QuickImport = ({ onSuccess }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Import Video</h2>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+      <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Quick Import Video</h2>
       
       <form onSubmit={handleUrlSubmit} className="space-y-4">
         <div>
-          <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="url" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Video URL
           </label>
           <div className="flex gap-2">
@@ -138,8 +138,8 @@ const QuickImport = ({ onSuccess }) => {
       </form>
 
       {preview && (
-        <div className="mt-6 border-t pt-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Video Preview</h3>
+        <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-6">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Video Preview</h3>
           
           <div className="flex flex-col md:flex-row gap-4 mb-6">
             {preview.thumbnail && (
@@ -150,9 +150,9 @@ const QuickImport = ({ onSuccess }) => {
               />
             )}
             <div className="flex-1">
-              <h4 className="font-semibold text-gray-900">{preview.title}</h4>
-              <p className="text-gray-600 text-sm mt-1">{preview.description}</p>
-              <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
+              <h4 className="font-semibold text-gray-900 dark:text-gray-100">{preview.title}</h4>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{preview.description}</p>
+              <div className="flex items-center gap-2 mt-2 text-sm text-gray-500 dark:text-gray-400">
                 <span className="capitalize">{preview.platform}</span>
                 {preview.author && (
                   <>
@@ -194,7 +194,7 @@ const QuickImport = ({ onSuccess }) => {
             />
 
             <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Category
               </label>
               <CategorySelect
@@ -202,7 +202,7 @@ const QuickImport = ({ onSuccess }) => {
                 value={formData.category}
                 onChange={handleInputChange}
                 name="category"
-                className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
 

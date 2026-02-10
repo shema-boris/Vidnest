@@ -10,8 +10,11 @@ import {
   TagIcon,
   ArrowRightOnRectangleIcon,
   UserCircleIcon,
+  SunIcon,
+  MoonIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const navigation = [
   { name: 'Home', href: '/dashboard', icon: HomeIcon },
@@ -28,6 +31,7 @@ export default function Layout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isAuthenticated, logout, useUserProfile } = useAuth();
   const { data: user } = useUserProfile();
+  const { isDarkMode, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -41,7 +45,7 @@ export default function Layout() {
   };
 
   const sidebarContent = (
-    <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gradient-to-b from-gray-900 to-gray-800 px-6 pb-6 border-r border-gray-700">
+    <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gradient-to-b from-gray-900 to-gray-800 dark:from-gray-950 dark:to-gray-900 px-6 pb-6 border-r border-gray-700">
       <div className="flex h-20 shrink-0 items-center">
         <Link to="/" className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-lg bg-primary-500 flex items-center justify-center">
@@ -106,6 +110,17 @@ export default function Layout() {
                   <ArrowRightOnRectangleIcon className="h-3.5 w-3.5 text-gray-400 group-hover:text-red-500 transition-colors duration-200" />
                   Sign out
                 </button>
+                <button
+                  onClick={toggleTheme}
+                  className="group w-full flex items-center gap-x-3 rounded-lg p-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-yellow-400 transition-colors duration-200"
+                >
+                  {isDarkMode ? (
+                    <SunIcon className="h-3.5 w-3.5 text-gray-400 group-hover:text-yellow-400 transition-colors duration-200" />
+                  ) : (
+                    <MoonIcon className="h-3.5 w-3.5 text-gray-400 group-hover:text-yellow-400 transition-colors duration-200" />
+                  )}
+                  {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+                </button>
               </div>
             ) : (
               <div className="space-y-3">
@@ -130,7 +145,7 @@ export default function Layout() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950">
       {/* Mobile menu */}
       <Transition.Root show={mobileMenuOpen} as="div">
         <Dialog as="div" className="relative z-50 lg:hidden" onClose={setMobileMenuOpen}>
@@ -191,10 +206,10 @@ export default function Layout() {
 
       {/* Main content */}
       <div className="lg:pl-72 transition-all duration-200">
-        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white/80 backdrop-blur-sm px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
           <button
             type="button"
-            className="-m-2.5 p-2.5 text-gray-700 lg:hidden rounded-lg hover:bg-gray-100 transition-colors duration-200"
+            className="-m-2.5 p-2.5 text-gray-700 dark:text-gray-300 lg:hidden rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
             onClick={() => setMobileMenuOpen(true)}
           >
             <span className="sr-only">Open sidebar</span>
@@ -213,8 +228,19 @@ export default function Layout() {
             
             {isAuthenticated && user && (
               <div className="flex items-center gap-x-4">
+                <button
+                  onClick={toggleTheme}
+                  className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 transition-colors duration-200"
+                  title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                >
+                  {isDarkMode ? (
+                    <SunIcon className="h-5 w-5" />
+                  ) : (
+                    <MoonIcon className="h-5 w-5" />
+                  )}
+                </button>
                 <div className="hidden sm:block">
-                  <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.name}</p>
                 </div>
                 <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-sm font-semibold shadow-sm">
                   {user.name?.charAt(0).toUpperCase() || 'U'}

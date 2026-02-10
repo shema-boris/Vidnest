@@ -1,4 +1,4 @@
-import { EyeIcon, ClockIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/solid';
+import { ClockIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/solid';
 import { getPlatformIcon } from '../../utils/platformUtils';
 
 const VideoCard = ({ video }) => {
@@ -8,11 +8,9 @@ const VideoCard = ({ video }) => {
     title,
     thumbnail,
     duration,
-    views = 0,
     platform,
     tags = [],
     createdAt,
-    isPublic = true,
     url,
   } = video;
 
@@ -22,14 +20,6 @@ const VideoCard = ({ video }) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
-
-  // Format view count
-  const formatViews = (count) => {
-    if (isNaN(count) || count === null) return '0';
-    if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
-    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
-    return count.toString();
   };
 
   // Format date to relative time (e.g., "2 days ago")
@@ -78,12 +68,6 @@ const VideoCard = ({ video }) => {
           </div>
         )}
 
-        {!isPublic && (
-          <div className="absolute right-2 top-2 rounded bg-black bg-opacity-70 px-2 py-1 text-xs font-medium text-white">
-            Private
-          </div>
-        )}
-
         {duration && (
           <div className="absolute bottom-2 right-2 rounded bg-black bg-opacity-70 px-1.5 py-0.5 text-xs font-medium text-white">
             {formatDuration(duration)}
@@ -106,8 +90,7 @@ const VideoCard = ({ video }) => {
 
         <div className="mt-2 flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
           <div className="flex items-center">
-            <EyeIcon className="mr-1 h-3.5 w-3.5" />
-            <span>{formatViews(views)}</span>
+            <span className="capitalize">{platform || 'other'}</span>
           </div>
 
           <div className="flex items-center">

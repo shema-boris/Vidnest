@@ -112,7 +112,7 @@ const VideoDetailPage = () => {
         </Button>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
         {/* Thumbnail */}
         <div className="aspect-w-16 aspect-h-9 bg-black flex items-center justify-center">
           <a
@@ -132,10 +132,10 @@ const VideoDetailPage = () => {
         <div className="p-6">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                 {video.title}
               </h1>
-              <div className="flex items-center text-sm text-gray-500">
+              <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                 <span className="capitalize">{video.platform || 'other'}</span>
                 <span className="mx-2">•</span>
                 <span>
@@ -174,7 +174,7 @@ const VideoDetailPage = () => {
 
           {/* Description */}
           <div className="prose max-w-none mb-6">
-            <p className="text-gray-700 whitespace-pre-line">
+            <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line">
               {video.description}
             </p>
           </div>
@@ -194,11 +194,11 @@ const VideoDetailPage = () => {
           )}
 
           {/* Details */}
-          <div className="border-t border-gray-200 pt-4">
-            <h3 className="text-sm font-medium text-gray-900">Details</h3>
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+            <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">Details</h3>
             <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
               <div>
-                <p className="text-gray-500">Duration</p>
+                <p className="text-gray-500 dark:text-gray-400">Duration</p>
                 <p className="font-medium">
                   {video.duration
                     ? `${Math.floor(video.duration / 60)}:${(
@@ -210,7 +210,7 @@ const VideoDetailPage = () => {
                 </p>
               </div>
               <div>
-                <p className="text-gray-500">Uploaded by</p>
+                <p className="text-gray-500 dark:text-gray-400">Uploaded by</p>
                 <p className="font-medium">{video.user?.name || 'Unknown'}</p>
               </div>
             </div>

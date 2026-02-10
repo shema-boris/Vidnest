@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
 import { VideoProvider } from './contexts/VideoContext';
 import { CategoryProvider } from './contexts/CategoryContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -37,12 +38,13 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <Router>
-      <ErrorBoundary>
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <CategoryProvider>
-              <VideoProvider>
+    <ThemeProvider>
+      <Router>
+        <ErrorBoundary>
+          <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+              <CategoryProvider>
+                <VideoProvider>
                 <Routes>
                   {/* Public routes */}
                   <Route path="/" element={<LandingPage />} />
@@ -86,12 +88,13 @@ function App() {
                     style: { background: '#363636', color: '#fff' },
                   }}
                 />
-              </VideoProvider>
-            </CategoryProvider>
-          </AuthProvider>
-        </QueryClientProvider>
-      </ErrorBoundary>
-    </Router>
+                </VideoProvider>
+              </CategoryProvider>
+            </AuthProvider>
+          </QueryClientProvider>
+        </ErrorBoundary>
+      </Router>
+    </ThemeProvider>
   );
 }
 
