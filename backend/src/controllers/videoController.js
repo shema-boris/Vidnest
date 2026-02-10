@@ -2,6 +2,7 @@ import Video from '../models/Video.js';
 import Category from '../models/Category.js';
 import { validationResult } from 'express-validator';
 import { extractVideoMetadata } from '../services/videoImportService.js';
+import { normalizeVideoUrl } from '../utils/videoUtils.js';
 
 // @desc    Get all videos for the authenticated user
 // @route   GET /api/videos
@@ -85,6 +86,27 @@ export const createVideo = async (req, res) => {
   try {
     const { url, title: manualTitle, description: manualDescription, tags: manualTags, category: manualCategoryId } = req.body;
     
+    // Check for duplicate URL before processing
+    const normalizedUrl = normalizeVideoUrl(url);
+    const existingVideo = await Video.findOne({
+      user: req.user.id,
+      $or: [
+        { url: url },
+        { url: normalizedUrl },
+      ]
+    });
+
+    if (existingVideo) {
+      return res.status(409).json({
+        message: 'You have already saved this video.',
+        existingVideo: {
+          _id: existingVideo._id,
+          title: existingVideo.title,
+          url: existingVideo.url,
+        }
+      });
+    }
+
     // Extract metadata from URL
     console.log(`Extracting metadata for URL: ${url}`);
     const metadata = await extractVideoMetadata(url);

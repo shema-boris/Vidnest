@@ -53,6 +53,10 @@ export const VideoProvider = ({ children }) => {
       return newVideo;
     } catch (error) {
       console.error('Error creating video:', error);
+      if (error.response?.status === 409) {
+        const existingTitle = error.response.data?.existingVideo?.title || 'this video';
+        toast.error(`Duplicate: "${existingTitle}" is already in your library.`);
+      }
       throw error;
     }
   }, [queryClient]);

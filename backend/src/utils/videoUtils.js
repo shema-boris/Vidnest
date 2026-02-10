@@ -65,6 +65,81 @@ export const getPlatformFromUrl = (url) => {
   return 'other';
 };
 
+// @desc    Normalize a video URL to a canonical form for duplicate detection
+// @param   {string} url - The video URL
+// @return  {string} - Normalized URL
+export const normalizeVideoUrl = (url) => {
+  if (!url) return '';
+
+  try {
+    let normalized = url.trim();
+
+    // Ensure URL has a protocol
+    if (!normalized.startsWith('http')) {
+      normalized = `https://${normalized}`;
+    }
+
+    const urlObj = new URL(normalized);
+
+    // Remove common tracking parameters
+    const trackingParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
+      'si', 'feature', 'fbclid', 'gclid', 'ref', 'source', 'igshid', 'igsh'];
+    trackingParams.forEach(param => urlObj.searchParams.delete(param));
+
+    // Remove trailing slashes
+    urlObj.pathname = urlObj.pathname.replace(/\/+$/, '');
+
+    // Remove www prefix
+    urlObj.hostname = urlObj.hostname.replace(/^www\./, '');
+
+    // Platform-specific normalization
+    const host = urlObj.hostname.toLowerCase();
+
+    // YouTube: youtu.be → youtube.com, m.youtube.com → youtube.com
+    if (host === 'youtu.be') {
+      const videoId = urlObj.pathname.slice(1);
+      return `https://youtube.com/watch?v=${videoId}`;
+    }
+    if (host === 'm.youtube.com' || host === 'youtube.com') {
+      urlObj.hostname = 'youtube.com';
+      // For shorts, normalize to watch URL
+      const shortsMatch = urlObj.pathname.match(/^\/shorts\/(.+)/);
+      if (shortsMatch) {
+        return `https://youtube.com/watch?v=${shortsMatch[1]}`;
+      }
+      // Keep only the v parameter for watch URLs
+      if (urlObj.searchParams.has('v')) {
+        return `https://youtube.com/watch?v=${urlObj.searchParams.get('v')}`;
+      }
+    }
+
+    // TikTok: vm.tiktok.com, vt.tiktok.com, m.tiktok.com → tiktok.com
+    if (host.endsWith('tiktok.com')) {
+      urlObj.hostname = 'tiktok.com';
+    }
+
+    // Instagram: instagr.am → instagram.com
+    if (host === 'instagr.am' || host.endsWith('instagram.com')) {
+      urlObj.hostname = 'instagram.com';
+    }
+
+    // Facebook: m.facebook.com → facebook.com, fb.watch → keep as is
+    if (host === 'm.facebook.com') {
+      urlObj.hostname = 'facebook.com';
+    }
+
+    // Twitter: mobile.twitter.com → twitter.com
+    if (host === 'mobile.twitter.com') {
+      urlObj.hostname = 'twitter.com';
+    }
+
+    return urlObj.toString().replace(/\/+$/, '');
+  } catch (error) {
+    // If URL parsing fails, just return trimmed lowercase
+    return url.trim().toLowerCase();
+  }
+};
+
 // @desc    Format duration in seconds to HH:MM:SS
 // @param   {number} seconds - Duration in seconds
 // @return  {string} - Formatted duration
