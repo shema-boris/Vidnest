@@ -62,7 +62,14 @@ beforeAll(async () => {
         password: userData.password,
       });
     
-    authToken = res.body.token;
+    // Extract JWT from response cookie (cookie-based auth)
+    const cookies = res.headers['set-cookie'];
+    if (cookies) {
+      const jwtCookie = cookies.find(c => c.startsWith('jwt='));
+      if (jwtCookie) {
+        authToken = jwtCookie.split('=')[1].split(';')[0];
+      }
+    }
     console.log('✅ Test user created and authenticated');
   } catch (error) {
     console.error('❌ Setup failed:', error.message);

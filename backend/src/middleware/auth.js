@@ -4,7 +4,13 @@ import User from '../models/User.js';
 // @desc    Protect routes
 const protect = async (req, res, next) => {
   try {
-    const token = req.cookies?.jwt;
+    let token = req.cookies?.jwt;
+
+    // Fallback: check Authorization header (for API clients and tests)
+    if (!token && req.headers.authorization?.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+
     if (!token) {
       return res.status(401).json({ message: 'Not authorized, no token' });
     }
