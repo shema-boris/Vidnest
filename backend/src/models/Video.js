@@ -31,7 +31,7 @@ const videoSchema = new mongoose.Schema(
     },
     platform: {
       type: String,
-      enum: ['youtube', 'tiktok', 'instagram', 'other'],
+      enum: ['youtube', 'tiktok', 'instagram', 'facebook', 'twitter', 'vimeo', 'other'],
       default: 'other',
     },
     tags: [{

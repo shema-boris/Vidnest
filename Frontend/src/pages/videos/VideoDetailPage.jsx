@@ -15,7 +15,7 @@ const VideoDetailPage = () => {
   const { isAuthenticated, user } = useAuth();
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const { getVideo, deleteVideo, incrementVideoViews } = useVideo();
+  const { getVideo, deleteVideo } = useVideo();
 
   const [video, setVideo] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,11 +28,6 @@ const VideoDetailPage = () => {
         setIsLoading(true);
         const videoData = await getVideo(id);
         setVideo(videoData);
-
-        if (isAuthenticated && user?._id !== videoData.user?._id) {
-          await incrementVideoViews(id);
-        }
-
         setError(null);
       } catch (err) {
         console.error('Error fetching video:', err);
@@ -44,7 +39,7 @@ const VideoDetailPage = () => {
     };
 
     fetchVideo();
-  }, [id, isAuthenticated, user?._id, getVideo, incrementVideoViews]);
+  }, [id, getVideo]);
 
   // Delete handler
   const handleDelete = async () => {
@@ -141,7 +136,7 @@ const VideoDetailPage = () => {
                 {video.title}
               </h1>
               <div className="flex items-center text-sm text-gray-500">
-                <span>{video.views || 0} views</span>
+                <span className="capitalize">{video.platform || 'other'}</span>
                 <span className="mx-2">•</span>
                 <span>
                   {video.createdAt

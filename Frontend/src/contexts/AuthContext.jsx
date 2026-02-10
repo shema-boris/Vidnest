@@ -105,6 +105,7 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (userData) => {
     try {
       const { data } = await api.put('/auth/profile', userData);
+      setUser(data);
       toast.success('Profile updated successfully!');
       return { success: true, data };
     } catch (error) {
