@@ -92,7 +92,10 @@ export default function Layout() {
           <li className="mt-auto pt-4 border-t border-gray-700">
             {isAuthenticated && user ? (
               <div className="space-y-4">
-                <div className="flex items-center gap-x-3 p-2 rounded-lg bg-gray-800/50 hover:bg-gray-800 transition-colors duration-200">
+                <Link
+                  to="/profile"
+                  className="flex items-center gap-x-3 p-2 rounded-lg bg-gray-800/50 hover:bg-gray-800 transition-colors duration-200"
+                >
                   <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-semibold shadow-md">
                     {user.name?.charAt(0).toUpperCase() || (
                       <UserCircleIcon className="h-3.5 w-3.5" />
@@ -102,7 +105,7 @@ export default function Layout() {
                     <p className="text-sm font-medium text-white truncate">{user.name || 'User'}</p>
                     <p className="text-xs text-gray-400 truncate">{user.email || ''}</p>
                   </div>
-                </div>
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="group w-full flex items-center gap-x-3 rounded-lg p-2 text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-red-400 transition-colors duration-200"
@@ -239,12 +242,12 @@ export default function Layout() {
                     <MoonIcon className="h-5 w-5" />
                   )}
                 </button>
-                <div className="hidden sm:block">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.name}</p>
-                </div>
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-sm font-semibold shadow-sm">
-                  {user.name?.charAt(0).toUpperCase() || 'U'}
-                </div>
+                <Link to="/profile" className="flex items-center gap-x-3 hover:opacity-80 transition-opacity duration-200">
+                  <span className="hidden sm:block text-sm font-medium text-gray-900 dark:text-gray-100">{user.name}</span>
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-sm font-semibold shadow-sm">
+                    {user.name?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                </Link>
               </div>
             )}
           </div>

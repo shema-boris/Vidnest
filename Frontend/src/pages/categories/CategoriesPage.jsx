@@ -44,7 +44,7 @@ const CategoriesPage = () => {
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-700 p-4 rounded-md mb-6">
+        <div className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 p-4 rounded-md mb-6">
           {error}
         </div>
       )}
@@ -52,12 +52,12 @@ const CategoriesPage = () => {
       {loading && !categories.length ? (
         <div className="text-center py-8">Loading categories...</div>
       ) : (
-        <div className="bg-white shadow overflow-hidden sm:rounded-md">
-          <ul className="divide-y divide-gray-200">
+        <div className="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md">
+          <ul className="divide-y divide-gray-200 dark:divide-gray-700">
             {categories.map((category) => (
               <li key={category._id} className="px-6 py-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-900">{category.name}</span>
+                  <span className="text-gray-900 dark:text-gray-100">{category.name}</span>
                   <Button
                     variant="danger"
                     size="sm"
@@ -71,7 +71,7 @@ const CategoriesPage = () => {
             ))}
             
             {!categories.length && (
-              <li className="px-6 py-4 text-center text-gray-500">
+              <li className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
                 No categories found. Add your first category!
               </li>
             )}
@@ -104,7 +104,7 @@ const CategoriesPage = () => {
         }
       >
         <div className="mt-4">
-          <label htmlFor="categoryName" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="categoryName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Category Name
           </label>
           <input
@@ -112,7 +112,7 @@ const CategoriesPage = () => {
             id="categoryName"
             value={newCategoryName}
             onChange={(e) => setNewCategoryName(e.target.value)}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             placeholder="Enter category name"
             autoFocus
           />

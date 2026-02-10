@@ -59,12 +59,12 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="flex min-h-full flex-1 flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-950 min-h-screen">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
+        <h2 className="mt-6 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900 dark:text-gray-100">
           Create a new account
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
           Already have an account?{' '}
           <Link
             to="/login"
@@ -76,9 +76,9 @@ const RegisterPage = () => {
       </div>
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
-        <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
+        <div className="bg-white dark:bg-gray-900 px-6 py-12 shadow sm:rounded-lg sm:px-12">
           {error && (
-            <div className="mb-6 rounded-md bg-red-50 p-4">
+            <div className="mb-6 rounded-md bg-red-50 dark:bg-red-900/30 p-4">
               <div className="flex">
                 <div className="flex-shrink-0">
                   <svg
@@ -95,7 +95,7 @@ const RegisterPage = () => {
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">{error}</h3>
+                  <h3 className="text-sm font-medium text-red-800 dark:text-red-300">{error}</h3>
                 </div>
               </div>
             </div>
@@ -105,7 +105,7 @@ const RegisterPage = () => {
             <div>
               <label
                 htmlFor="name"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-200"
               >
                 Full Name
               </label>
@@ -115,8 +115,8 @@ const RegisterPage = () => {
                   name="name"
                   type="text"
                   autoComplete="name"
-                  className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
-                    errors.name ? 'ring-red-300' : 'ring-gray-300'
+                  className={`block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 shadow-sm ring-1 ring-inset ${
+                    errors.name ? 'ring-red-300' : 'ring-gray-300 dark:ring-gray-600'
                   } placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6`}
                   {...register('name', {
                     required: 'Name is required',
@@ -137,7 +137,7 @@ const RegisterPage = () => {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-200"
               >
                 Email address
               </label>
@@ -147,8 +147,8 @@ const RegisterPage = () => {
                   name="email"
                   type="email"
                   autoComplete="email"
-                  className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
-                    errors.email ? 'ring-red-300' : 'ring-gray-300'
+                  className={`block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 shadow-sm ring-1 ring-inset ${
+                    errors.email ? 'ring-red-300' : 'ring-gray-300 dark:ring-gray-600'
                   } placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6`}
                   {...register('email', {
                     required: 'Email is required',
@@ -169,7 +169,7 @@ const RegisterPage = () => {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-200"
               >
                 Password
               </label>
@@ -179,8 +179,8 @@ const RegisterPage = () => {
                   name="password"
                   type="password"
                   autoComplete="new-password"
-                  className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
-                    errors.password ? 'ring-red-300' : 'ring-gray-300'
+                  className={`block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 shadow-sm ring-1 ring-inset ${
+                    errors.password ? 'ring-red-300' : 'ring-gray-300 dark:ring-gray-600'
                   } placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6`}
                   {...register('password', {
                     required: 'Password is required',
@@ -208,7 +208,7 @@ const RegisterPage = () => {
             <div>
               <label
                 htmlFor="confirmPassword"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-200"
               >
                 Confirm Password
               </label>
@@ -218,8 +218,8 @@ const RegisterPage = () => {
                   name="confirmPassword"
                   type="password"
                   autoComplete="new-password"
-                  className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
-                    errors.confirmPassword ? 'ring-red-300' : 'ring-gray-300'
+                  className={`block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 shadow-sm ring-1 ring-inset ${
+                    errors.confirmPassword ? 'ring-red-300' : 'ring-gray-300 dark:ring-gray-600'
                   } placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6`}
                   {...register('confirmPassword', {
                     required: 'Please confirm your password',
@@ -245,7 +245,7 @@ const RegisterPage = () => {
                   required: 'You must accept the terms and conditions',
                 })}
               />
-              <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
+              <label htmlFor="terms" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
                 I agree to the{' '}
                 <a href="#" className="text-primary-600 hover:text-primary-500">
                   Terms and Conditions
@@ -272,10 +272,10 @@ const RegisterPage = () => {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
+                <div className="w-full border-t border-gray-200 dark:border-gray-700" />
               </div>
               <div className="relative flex justify-center text-sm font-medium leading-6">
-                <span className="bg-white px-6 text-gray-900">
+                <span className="bg-white dark:bg-gray-900 px-6 text-gray-900 dark:text-gray-400">
                   Or continue with
                 </span>
               </div>
@@ -284,7 +284,7 @@ const RegisterPage = () => {
             <div className="mt-6 grid grid-cols-2 gap-4">
               <button
                 type="button"
-                className="flex w-full items-center justify-center gap-3 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:ring-transparent"
+                className="flex w-full items-center justify-center gap-3 rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 focus-visible:ring-transparent"
               >
                 <svg className="h-5 w-5" aria-hidden="true" viewBox="0 0 24 24">
                   <path
@@ -309,10 +309,10 @@ const RegisterPage = () => {
 
               <button
                 type="button"
-                className="flex w-full items-center justify-center gap-3 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:ring-transparent"
+                className="flex w-full items-center justify-center gap-3 rounded-md bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 focus-visible:ring-transparent"
               >
                 <svg
-                  className="h-5 w-5 fill-[#24292F]"
+                  className="h-5 w-5 fill-[#24292F] dark:fill-white"
                   aria-hidden="true"
                   viewBox="0 0 20 20"
                 >

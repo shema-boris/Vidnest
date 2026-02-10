@@ -42,11 +42,11 @@ const AddVideoPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow">
-        <h1 className="text-2xl font-bold mb-6 text-gray-900">Add New Video</h1>
+      <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-8 rounded-lg shadow">
+        <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">Add New Video</h1>
         
         {error && (
-          <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-md">
+          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-md">
             {error}
           </div>
         )}
@@ -86,13 +86,13 @@ const AddVideoPage = () => {
           />
 
           <div>
-            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Category
             </label>
             <CategorySelect
               id="category"
               {...register('category')}
-              className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
             />
           </div>
 

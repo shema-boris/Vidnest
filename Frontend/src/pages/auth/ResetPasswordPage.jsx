@@ -71,11 +71,11 @@ const ResetPasswordPage = () => {
 
   if (!tokenValid) {
     return (
-      <div className="flex min-h-full flex-1 flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="flex min-h-full flex-1 flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-950 min-h-screen">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
+          <div className="bg-white dark:bg-gray-900 px-6 py-12 shadow sm:rounded-lg sm:px-12">
             <div className="text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 mb-4">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30 mb-4">
                 <svg
                   className="h-6 w-6 text-red-600"
                   fill="none"
@@ -90,10 +90,10 @@ const ResetPasswordPage = () => {
                   />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                 Invalid or Expired Link
               </h2>
-              <p className="text-sm text-gray-600 mb-6">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
                 This password reset link is invalid or has expired. Password reset links are only valid for 10 minutes.
               </p>
               <div className="space-y-3">
@@ -118,23 +118,23 @@ const ResetPasswordPage = () => {
   }
 
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="flex min-h-full flex-1 flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-950 min-h-screen">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
+        <h2 className="mt-6 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900 dark:text-gray-100">
           Set new password
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+        <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
           Please enter your new password below.
         </p>
       </div>
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
-        <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
+        <div className="bg-white dark:bg-gray-900 px-6 py-12 shadow sm:rounded-lg sm:px-12">
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-200"
               >
                 New Password
               </label>
@@ -144,8 +144,8 @@ const ResetPasswordPage = () => {
                   name="password"
                   type="password"
                   autoComplete="new-password"
-                  className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
-                    errors.password ? 'ring-red-300' : 'ring-gray-300'
+                  className={`block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 shadow-sm ring-1 ring-inset ${
+                    errors.password ? 'ring-red-300' : 'ring-gray-300 dark:ring-gray-600'
                   } placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6`}
                   {...register('password', {
                     required: 'Password is required',
@@ -166,7 +166,7 @@ const ResetPasswordPage = () => {
             <div>
               <label
                 htmlFor="confirmPassword"
-                className="block text-sm font-medium leading-6 text-gray-900"
+                className="block text-sm font-medium leading-6 text-gray-900 dark:text-gray-200"
               >
                 Confirm New Password
               </label>
@@ -176,8 +176,8 @@ const ResetPasswordPage = () => {
                   name="confirmPassword"
                   type="password"
                   autoComplete="new-password"
-                  className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ${
-                    errors.confirmPassword ? 'ring-red-300' : 'ring-gray-300'
+                  className={`block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 shadow-sm ring-1 ring-inset ${
+                    errors.confirmPassword ? 'ring-red-300' : 'ring-gray-300 dark:ring-gray-600'
                   } placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6`}
                   {...register('confirmPassword', {
                     required: 'Please confirm your password',
@@ -210,10 +210,10 @@ const ResetPasswordPage = () => {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
+                <div className="w-full border-t border-gray-200 dark:border-gray-700" />
               </div>
               <div className="relative flex justify-center text-sm font-medium leading-6">
-                <span className="bg-white px-6 text-gray-500">Or</span>
+                <span className="bg-white dark:bg-gray-900 px-6 text-gray-500 dark:text-gray-400">Or</span>
               </div>
             </div>
 
@@ -228,7 +228,7 @@ const ResetPasswordPage = () => {
           </div>
         </div>
 
-        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
           <div className="flex">
             <div className="flex-shrink-0">
               <svg
@@ -244,7 +244,7 @@ const ResetPasswordPage = () => {
               </svg>
             </div>
             <div className="ml-3">
-              <p className="text-sm text-blue-700">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
                 <strong>Security tip:</strong> Choose a strong password with at least 6 characters. You'll be automatically logged in after resetting your password.
               </p>
             </div>

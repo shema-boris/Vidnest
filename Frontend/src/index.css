@@ -28,10 +28,10 @@
   }
 
   .dark {
-    --background: 17 24 39;
+    --background: 3 7 18;
     --foreground: 243 244 246;
-    --primary: 14 165 233;
-    --primary-foreground: 255 255 255;
+    --primary: 56 189 248;
+    --primary-foreground: 3 7 18;
     --secondary: 99 102 241;
     --secondary-foreground: 255 255 255;
     --destructive: 239 68 68;
@@ -42,10 +42,10 @@
     --accent-foreground: 243 244 246;
     --border: 55 65 81;
     --input: 55 65 81;
-    --ring: 59 130 246;
-    --card: 31 41 55;
+    --ring: 56 189 248;
+    --card: 17 24 39;
     --card-foreground: 243 244 246;
-    --popover: 31 41 55;
+    --popover: 24 31 47;
     --popover-foreground: 243 244 246;
   }
 
@@ -81,7 +81,7 @@
   select,
   textarea,
   button {
-    @apply outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 transition-all duration-200;
+    @apply outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-all duration-200;
   }
 
   /* Scrollbar */

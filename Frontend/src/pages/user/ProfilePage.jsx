@@ -108,7 +108,7 @@ const ProfilePage = () => {
                 <h1 className="mt-4 text-3xl font-bold text-gray-900 dark:text-gray-100">{user.name}</h1>
                 <p className="mt-1 text-md text-gray-500 dark:text-gray-400">{user.email}</p>
 
-                <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-6 border-t border-gray-200 pt-8">
+                <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-6 border-t border-gray-200 dark:border-gray-700 pt-8">
                   <StatItem label="Total Videos" value={videos?.length || 0} />
                   <StatItem label="Platforms" value={videos ? new Set(videos.map(v => v.platform)).size : 0} />
                   <StatItem label="Tags Used" value={videos ? new Set(videos.flatMap(v => v.tags || [])).size : 0} />
