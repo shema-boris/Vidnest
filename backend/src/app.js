@@ -21,10 +21,11 @@ app.use(cors({
       'http://localhost:5174',
       'http://localhost:3000',
       'https://vidnest.vercel.app',
+      'https://vidnest-ten.vercel.app',
       'https://vidnest.onrender.com'
     ];
     if (allowedOrigins.includes(origin)) return callback(null, true);
-    if (/^https:\/\/vidnest-[a-z0-9]+-vidnest\.vercel\.app$/.test(origin)) return callback(null, true);
+    if (/^https:\/\/vidnest[-a-z0-9]*\.vercel\.app$/.test(origin)) return callback(null, true);
     return callback(new Error(`CORS policy does not allow access from origin: ${origin}`));
   },
   credentials: true,
