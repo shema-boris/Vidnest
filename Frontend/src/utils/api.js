@@ -22,6 +22,15 @@ const api = axios.create({
   },
 });
 
+// Request interceptor to attach Bearer token from localStorage
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('vidnest-token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 // Response interceptor to handle common errors
 api.interceptors.response.use(
   (response) => {

@@ -17,7 +17,13 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Validate session with the server (cookie-based auth)
+        const token = localStorage.getItem('vidnest-token');
+        if (!token) {
+          setIsAuthenticated(false);
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
         const { data } = await api.get('/auth/profile');
         if (data) {
           setIsAuthenticated(true);
@@ -25,6 +31,7 @@ export const AuthProvider = ({ children }) => {
         }
       } catch (error) {
         console.error('Auth check failed:', error);
+        localStorage.removeItem('vidnest-token');
         setIsAuthenticated(false);
         setUser(null);
       } finally {
@@ -39,6 +46,11 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const { data } = await api.post('/auth/login', { email, password });
+      
+      // Save token to localStorage for cross-domain auth (mobile)
+      if (data.token) {
+        localStorage.setItem('vidnest-token', data.token);
+      }
       
       // Update auth state immediately
       setIsAuthenticated(true);
@@ -86,7 +98,8 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      // Clear local storage and state
+      // Clear token and state
+      localStorage.removeItem('vidnest-token');
       setIsAuthenticated(false);
       setUser(null);
       
