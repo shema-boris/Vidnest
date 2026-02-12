@@ -250,7 +250,7 @@ export const resetPassword = async (req, res) => {
     await user.save();
 
     // Generate new JWT and set cookie
-    const token = generateToken(res, user._id);
+    const jwtToken = generateToken(res, user._id);
 
     res.status(200).json({
       success: true,
@@ -259,7 +259,7 @@ export const resetPassword = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      token,
+      token: jwtToken,
     });
   } catch (error) {
     console.error('Reset password error:', error);
