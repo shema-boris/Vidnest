@@ -14,13 +14,10 @@
 *.env
 
 # Development documentation and notes (session records)
-REMOVE_ENV_FROM_GIT.md
-PLATFORM_SUPPORT.md
-*_NOTES.md
-*_TODO.md
+*.md
+!README.md
 progress.txt
 notes.txt
-session-*.md
 
 # Node modules (handled by frontend and backend)
 node_modules/
