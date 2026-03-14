@@ -55,8 +55,25 @@ jobs:
         working-directory: ./Frontend
         run: npm test --silent
 
-  deploy-staging:
+  docker-build:
     needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Validate Docker Compose files
+        run: |
+          docker compose -f docker-compose.yml config
+          docker compose -f docker-compose.yml -f docker-compose.dev.yml config
+
+      - name: Build backend image
+        run: docker build -t vidnest-backend ./backend
+
+      - name: Build frontend image
+        run: docker build --build-arg VITE_API_URL=http://localhost:5000 -t vidnest-frontend ./Frontend
+
+  deploy-staging:
+    needs: [test, docker-build]
     if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     steps:
@@ -70,7 +87,7 @@ jobs:
           vercel-args: '--prod'
 
   deploy-prod:
-    needs: test
+    needs: [test, docker-build]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
