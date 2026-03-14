@@ -64,7 +64,7 @@ jobs:
       - name: Validate Docker Compose files
         run: |
           docker compose -f docker-compose.yml config
-          docker compose -f docker-compose.yml -f docker-compose.dev.yml config
+          docker compose -f docker-compose.dev.yml --project-name dev config
 
       - name: Build backend image
         run: docker build -t vidnest-backend ./backend
